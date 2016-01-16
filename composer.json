@@ -1,0 +1,36 @@
+{
+    "name": "talesoft/tale-stream",
+    "type": "library",
+    "keywords": ["stream", "stream-wrapper"],
+    "description": "A basic, PSR-7 compatible stream utility library",
+    "license": "MIT",
+    "homepage": "http://stream.tale.talesoft.io",
+    "authors": [
+        {
+            "name": "Talesoft",
+            "homepage": "http://talesoft.io",
+            "email": "info@talesoft.io"
+        },
+        {
+            "name": "Torben Koehn",
+            "email": "tk@talesoft.io"
+        }
+    ],
+    "minimum-stability": "dev",
+    "require": {
+        "php": ">=5.5.0",
+        "psr/http-message": ">=1.0"
+    },
+    "require-dev": {
+        "phpunit/phpunit": "~4.0"
+    },
+    "autoload": {
+        "psr-4": {
+            "Tale\\": ""
+        },
+        "files": [
+        ]
+    },
+    "suggest": {
+    }
+}
