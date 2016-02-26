@@ -7,15 +7,47 @@ use Psr\Http\Message\StreamInterface;
 use Psr\Http\Message\UriInterface;
 use RuntimeException;
 
+/**
+ * Class Stream
+ *
+ * @package Tale
+ */
 class Stream implements StreamInterface
 {
 
+    /**
+     * The default stream mode
+     */
     const DEFAULT_MODE = 'rb+';
 
+    /**
+     * The current stream context (file resource)
+     *
+     * @var resource
+     */
     private $_context;
+
+    /**
+     * The mode this file has been opened with
+     *
+     * @var string
+     */
     private $_mode;
+
+    /**
+     * An array of meta data information
+     *
+     * @var array
+     */
     private $_metadata;
 
+
+    /**
+     * Stream constructor.
+     *
+     * @param UriInterface|string|resource $context
+     * @param null $mode
+     */
     public function __construct($context, $mode = null)
     {
 
@@ -36,6 +68,9 @@ class Stream implements StreamInterface
         $this->_metadata = stream_get_meta_data($this->_context);
     }
 
+    /**
+     *
+     */
     public function __destruct()
     {
 
@@ -43,12 +78,18 @@ class Stream implements StreamInterface
     }
 
 
+    /**
+     * @return resource
+     */
     public function getContext()
     {
 
         return $this->_context;
     }
 
+    /**
+     * @return string
+     */
     public function getMode()
     {
 
@@ -245,10 +286,8 @@ class Stream implements StreamInterface
     public function __toString()
     {
 
-        if (!$this->isReadable()) {
-
+        if (!$this->isReadable())
             return '';
-        }
 
         if ($this->isSeekable())
             $this->rewind();
@@ -256,5 +295,8 @@ class Stream implements StreamInterface
         return $this->getContents();
     }
 
+    /**
+     *
+     */
     private function __clone() {}
 }
