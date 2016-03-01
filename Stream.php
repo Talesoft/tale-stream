@@ -25,21 +25,21 @@ class Stream implements StreamInterface
      *
      * @var resource
      */
-    private $_context;
+    private $context;
 
     /**
      * The mode this file has been opened with
      *
      * @var string
      */
-    private $_mode;
+    private $mode;
 
     /**
      * An array of meta data information
      *
      * @var array
      */
-    private $_metadata;
+    private $metadata;
 
 
     /**
@@ -51,21 +51,21 @@ class Stream implements StreamInterface
     public function __construct($context, $mode = null)
     {
 
-        $this->_context = $context;
-        $this->_mode = $mode ? $mode : self::DEFAULT_MODE;
+        $this->context = $context;
+        $this->mode = $mode ? $mode : self::DEFAULT_MODE;
 
-        if ($this->_context instanceof UriInterface)
-            $this->_context = (string)$this->_context;
+        if ($this->context instanceof UriInterface)
+            $this->context = (string)$this->context;
 
-        if (is_string($this->_context))
-            $this->_context = fopen($this->_context, $this->_mode);
+        if (is_string($this->context))
+            $this->context = fopen($this->context, $this->mode);
 
-        if (!is_resource($this->_context))
+        if (!is_resource($this->context))
             throw new InvalidArgumentException(
                 "Argument 1 needs to be resource or path/URI"
             );
 
-        $this->_metadata = stream_get_meta_data($this->_context);
+        $this->metadata = stream_get_meta_data($this->context);
     }
 
     /**
@@ -84,7 +84,7 @@ class Stream implements StreamInterface
     public function getContext()
     {
 
-        return $this->_context;
+        return $this->context;
     }
 
     /**
@@ -93,7 +93,7 @@ class Stream implements StreamInterface
     public function getMode()
     {
 
-        return $this->_mode;
+        return $this->mode;
     }
 
     /**
@@ -102,7 +102,7 @@ class Stream implements StreamInterface
     public function close()
     {
 
-        if (!$this->_context) {
+        if (!$this->context) {
 
             return;
         }
@@ -117,9 +117,9 @@ class Stream implements StreamInterface
     public function detach()
     {
 
-        $context = $this->_context;
-        $this->_context = null;
-        $this->_metadata = null;
+        $context = $this->context;
+        $this->context = null;
+        $this->metadata = null;
 
         return $context;
     }
@@ -130,10 +130,10 @@ class Stream implements StreamInterface
     public function getSize()
     {
 
-        if ($this->_context === null)
+        if ($this->context === null)
             return null;
 
-        $stat = fstat($this->_context);
+        $stat = fstat($this->context);
 
         return $stat['size'];
     }
@@ -144,7 +144,7 @@ class Stream implements StreamInterface
     public function tell()
     {
 
-        $result = ftell($this->_context);
+        $result = ftell($this->context);
         return $result;
     }
 
@@ -154,10 +154,10 @@ class Stream implements StreamInterface
     public function eof()
     {
 
-        if (!$this->_context)
+        if (!$this->context)
             return true;
 
-        return feof($this->_context);
+        return feof($this->context);
     }
 
     /**
@@ -166,7 +166,7 @@ class Stream implements StreamInterface
     public function isSeekable()
     {
 
-        if (!$this->_context)
+        if (!$this->context)
             return false;
 
         return $this->getMetadata('seekable') ? true : false;
@@ -183,7 +183,7 @@ class Stream implements StreamInterface
                 "Stream is not seekable"
             );
 
-        fseek($this->_context, $offset, $whence);
+        fseek($this->context, $offset, $whence);
 
         return true;
     }
@@ -203,7 +203,7 @@ class Stream implements StreamInterface
     public function isWritable()
     {
 
-        if (!$this->_context)
+        if (!$this->context)
             return false;
 
         $mode = $this->getMetadata('mode');
@@ -221,7 +221,7 @@ class Stream implements StreamInterface
                 "Stream is not writable"
             );
 
-        return fwrite($this->_context, $string);
+        return fwrite($this->context, $string);
     }
 
     /**
@@ -230,7 +230,7 @@ class Stream implements StreamInterface
     public function isReadable()
     {
 
-        if (!$this->_context)
+        if (!$this->context)
             return false;
 
         $mode = $this->getMetadata('mode');
@@ -248,7 +248,7 @@ class Stream implements StreamInterface
                 "Stream is not readable"
             );
 
-        return fread($this->_context, $length);
+        return fread($this->context, $length);
     }
 
     /**
@@ -262,7 +262,7 @@ class Stream implements StreamInterface
                 "Stream is not readable"
             );
 
-        return stream_get_contents($this->_context);
+        return stream_get_contents($this->context);
     }
 
     /**
@@ -272,12 +272,12 @@ class Stream implements StreamInterface
     {
 
         if ($key === null)
-            return $this->_metadata;
+            return $this->metadata;
 
-        if (!isset($this->_metadata[$key]))
+        if (!isset($this->metadata[$key]))
             return null;
 
-        return $this->_metadata[$key];
+        return $this->metadata[$key];
     }
 
     /**
