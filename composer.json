@@ -4,16 +4,12 @@
     "keywords": ["stream", "stream-wrapper"],
     "description": "A basic, PSR-7 compatible stream utility library",
     "license": "MIT",
-    "homepage": "http://stream.tale.talesoft.io",
+    "homepage": "http://docs.talesoft.io/tale-framework/tale/stream",
     "authors": [
         {
             "name": "Talesoft",
             "homepage": "http://talesoft.io",
             "email": "info@talesoft.io"
-        },
-        {
-            "name": "Torben Koehn",
-            "email": "tk@talesoft.io"
         }
     ],
     "minimum-stability": "dev",

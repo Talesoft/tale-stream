@@ -10,21 +10,7 @@ $ignore = [
     './.git'
 ];
 
-$newVersion = '1.0';
-
-
-if (!$newVersion) {
-    $tags = glob('.git/refs/tags/*');
-
-    if (count($tags) < 1)
-        throw new Exception(
-            "No tags found. Make sure the .git directory is there and you have any tags yet."
-        );
-
-    sort($tags);
-
-    $lastTag = basename(end($tags));
-}
+$version = '1.0';
 
 
 $dirIterator = new RecursiveDirectoryIterator('./');
@@ -37,7 +23,7 @@ $ignore = array_map(function($val) {
 }, $ignore);
 
 
-echo "Set Version: $newVersion\n";
+echo "Set Version: $version\n";
 
 //Do eeet
 foreach ($codeFiles as $codeFile) {
@@ -60,7 +46,7 @@ foreach ($codeFiles as $codeFile) {
     $content = str_replace(["\r", "\0"], '', $content);
 
     //Automatically append version to @version (auto): tags
-    $content = preg_replace("/@version.*\n/iU", "@version    {$newVersion}\n", $content);
+    $content = preg_replace("/@version.*\n/iU", "@version    {$version}\n", $content);
 
     file_put_contents($codeFile, $content);
 }

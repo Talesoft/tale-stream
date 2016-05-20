@@ -33,8 +33,8 @@ if ($stream->isWritable())
 
 # Available Streams
 
-`Tale\Stream\InputStream` -> php://input, rb
-`Tale\Stream\OutputStream` -> php://output, wb
-`Tale\Stream\MemoryStream` -> php://memory, wb+
-`Tale\Stream\TempStream` -> php://temp, wb+
-`Tale\Stream\StringStream` -> MemoryStream with initial content via constructor
+- `Tale\Stream\InputStream` -> php://input, rb
+- `Tale\Stream\OutputStream` -> php://output, wb
+- `Tale\Stream\MemoryStream` -> php://memory, wb+
+- `Tale\Stream\TempStream` -> php://temp, wb+
+- `Tale\Stream\StringStream` -> MemoryStream with initial content via constructor

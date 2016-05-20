@@ -15,7 +15,7 @@
     </transformations>
     <files>
         <directory>.</directory>
-        <ignore>tasks.php</ignore>
+        <ignore>tasks</ignore>
         <ignore>Test/*</ignore>
         <ignore>vendor/*</ignore>
     </files>

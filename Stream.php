@@ -28,13 +28,6 @@ class Stream implements StreamInterface
     private $context;
 
     /**
-     * The mode this file has been opened with
-     *
-     * @var string
-     */
-    private $mode;
-
-    /**
      * An array of meta data information
      *
      * @var array
@@ -52,13 +45,13 @@ class Stream implements StreamInterface
     {
 
         $this->context = $context;
-        $this->mode = $mode ? $mode : self::DEFAULT_MODE;
+        $mode = $mode ?: self::DEFAULT_MODE;
 
-        if ($this->context instanceof UriInterface)
+        if (is_object($context) && method_exists($context, '__toString'))
             $this->context = (string)$this->context;
 
         if (is_string($this->context))
-            $this->context = fopen($this->context, $this->mode);
+            $this->context = fopen($this->context, $mode);
 
         if (!is_resource($this->context))
             throw new InvalidArgumentException(
@@ -75,25 +68,6 @@ class Stream implements StreamInterface
     {
 
         $this->close();
-    }
-
-
-    /**
-     * @return resource
-     */
-    public function getContext()
-    {
-
-        return $this->context;
-    }
-
-    /**
-     * @return string
-     */
-    public function getMode()
-    {
-
-        return $this->mode;
     }
 
     /**

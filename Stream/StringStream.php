@@ -7,7 +7,7 @@ use Tale\Stream;
 class StringStream extends MemoryStream
 {
 
-    public function __construct($initialContent = null, $memoryOnly = true)
+    public function __construct($initialContent = null)
     {
         parent::__construct('rb+');
 
