@@ -1,33 +1,37 @@
 
-# Tale Stream
-**A Tale Framework Component**
+Tale Stream
+===========
 
-# What is Tale Stream?
+What is Tale Stream?
+--------------------
 
-Tale Stream is a little utility that eases up the usage of basic PHP streams.
+This is an implementation of the `Psr7\HttpMessage\StreamInterface`. It doesn't add any
+extra methods, only a few utility stream classes that extend it.
 
-It is PSR-7 compliant
+You can use it as a base for any kind of stream implementation.
 
-# Installation
-
-Install via Composer
+Installation
+------------
 
 ```bash
-composer require "talesoft/tale-stream:*"
-composer install
+composer require talesoft/tale-stream
 ```
 
-# Usage
+Usage
+-----
 
 ```php
+use Tale\Stream;
 
 $stream = new Stream('/some/file');
 
-if ($stream->isReadable())
+if ($stream->isReadable()) {
     $contents = $stream->read(100);
+}
 
-if ($stream->isWritable())
+if ($stream->isWritable()) {
     $stream->write('Some Content');
+}
     
 ```
 

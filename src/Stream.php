@@ -1,4 +1,5 @@
 <?php
+declare(strict_types=1);
 
 namespace Tale;
 
@@ -18,7 +19,7 @@ class Stream implements StreamInterface
     /**
      * The default stream mode
      */
-    const DEFAULT_MODE = 'rb+';
+    public const DEFAULT_MODE = 'rb+';
 
     /**
      * The current stream context (file resource)
@@ -39,24 +40,25 @@ class Stream implements StreamInterface
      * Stream constructor.
      *
      * @param UriInterface|string|resource $context
-     * @param null $mode
+     * @param string|null $mode
+     * @throws \InvalidArgumentException
      */
-    public function __construct($context, $mode = null)
+    public function __construct($context, ?string $mode = null)
     {
-
         $this->context = $context;
         $mode = $mode ?: self::DEFAULT_MODE;
 
-        if (is_object($context) && method_exists($context, '__toString'))
+        if (\is_object($context) && method_exists($context, '__toString')) {
             $this->context = (string)$this->context;
+        }
 
-        if (is_string($this->context))
+        if (\is_string($this->context)) {
             $this->context = fopen($this->context, $mode);
+        }
 
-        if (!is_resource($this->context))
-            throw new InvalidArgumentException(
-                "Argument 1 needs to be resource or path/URI"
-            );
+        if (!\is_resource($this->context)) {
+            throw new InvalidArgumentException('Argument 1 needs to be resource or path/URI');
+        }
 
         $this->metadata = stream_get_meta_data($this->context);
     }
@@ -66,18 +68,15 @@ class Stream implements StreamInterface
      */
     public function __destruct()
     {
-
         $this->close();
     }
 
     /**
      * {@inheritdoc}
      */
-    public function close()
+    public function close(): void
     {
-
         if (!$this->context) {
-
             return;
         }
 
@@ -90,7 +89,6 @@ class Stream implements StreamInterface
      */
     public function detach()
     {
-
         $context = $this->context;
         $this->context = null;
         $this->metadata = null;
@@ -101,15 +99,14 @@ class Stream implements StreamInterface
     /**
      * {@inheritdoc}
      */
-    public function getSize()
+    public function getSize(): ?int
     {
-
-        if ($this->context === null)
+        if ($this->context === null) {
             return null;
+        }
 
         $stat = fstat($this->context);
-
-        return $stat['size'];
+        return (int)$stat['size'];
     }
 
     /**
@@ -117,19 +114,17 @@ class Stream implements StreamInterface
      */
     public function tell()
     {
-
-        $result = ftell($this->context);
-        return $result;
+        return ftell($this->context);
     }
 
     /**
      * {@inheritdoc}
      */
-    public function eof()
+    public function eof(): bool
     {
-
-        if (!$this->context)
+        if (!$this->context) {
             return true;
+        }
 
         return feof($this->context);
     }
@@ -137,11 +132,11 @@ class Stream implements StreamInterface
     /**
      * {@inheritdoc}
      */
-    public function isSeekable()
+    public function isSeekable(): bool
     {
-
-        if (!$this->context)
+        if (!$this->context) {
             return false;
+        }
 
         return $this->getMetadata('seekable') ? true : false;
     }
@@ -149,39 +144,37 @@ class Stream implements StreamInterface
     /**
      * {@inheritdoc}
      */
-    public function seek($offset, $whence = \SEEK_SET)
+    public function seek($offset, $whence = \SEEK_SET): bool
     {
-
-        if (!$this->isSeekable())
-            throw new RuntimeException(
-                "Stream is not seekable"
-            );
+        if (!$this->isSeekable()) {
+            throw new RuntimeException('Stream is not seekable');
+        }
 
         fseek($this->context, $offset, $whence);
-
         return true;
     }
 
     /**
      * {@inheritdoc}
      */
-    public function rewind()
+    public function rewind(): bool
     {
-
         return $this->seek(0);
     }
 
     /**
      * {@inheritdoc}
      */
-    public function isWritable()
+    public function isWritable(): bool
     {
-
-        if (!$this->context)
+        if (!$this->context) {
             return false;
+        }
 
         $mode = $this->getMetadata('mode');
-        return (strstr($mode, 'w') || strstr($mode, 'x') || strstr($mode, 'c') || strstr($mode, '+'));
+        return (strpos($mode, 'w') !== false || strpos($mode, 'x') !== false
+            || strpos($mode, 'c') !== false  || strpos($mode, '+') !== false
+            || strpos($mode, 'a') !== false);
     }
 
     /**
@@ -189,11 +182,9 @@ class Stream implements StreamInterface
      */
     public function write($string)
     {
-
-        if (!$this->isWritable())
-            throw new RuntimeException(
-                "Stream is not writable"
-            );
+        if (!$this->isWritable()) {
+            throw new RuntimeException('Stream is not writable');
+        }
 
         return fwrite($this->context, $string);
     }
@@ -201,14 +192,14 @@ class Stream implements StreamInterface
     /**
      * {@inheritdoc}
      */
-    public function isReadable()
+    public function isReadable(): bool
     {
-
-        if (!$this->context)
+        if (!$this->context) {
             return false;
+        }
 
         $mode = $this->getMetadata('mode');
-        return (strstr($mode, 'r') || strstr($mode, '+'));
+        return (strpos($mode, 'r') !== false  || strpos($mode, '+') !== false );
     }
 
     /**
@@ -216,11 +207,9 @@ class Stream implements StreamInterface
      */
     public function read($length)
     {
-
-        if (!$this->isReadable())
-            throw new RuntimeException(
-                "Stream is not readable"
-            );
+        if (!$this->isReadable()) {
+            throw new RuntimeException('Stream is not readable');
+        }
 
         return fread($this->context, $length);
     }
@@ -228,13 +217,11 @@ class Stream implements StreamInterface
     /**
      * {@inheritdoc}
      */
-    public function getContents()
+    public function getContents(): string
     {
-
-        if (!$this->isReadable())
-            throw new RuntimeException(
-                "Stream is not readable"
-            );
+        if (!$this->isReadable()) {
+            throw new RuntimeException('Stream is not readable');
+        }
 
         return stream_get_contents($this->context);
     }
@@ -244,12 +231,13 @@ class Stream implements StreamInterface
      */
     public function getMetadata($key = null)
     {
-
-        if ($key === null)
+        if ($key === null) {
             return $this->metadata;
+        }
 
-        if (!isset($this->metadata[$key]))
+        if (!isset($this->metadata[$key])) {
             return null;
+        }
 
         return $this->metadata[$key];
     }
@@ -259,18 +247,24 @@ class Stream implements StreamInterface
      */
     public function __toString()
     {
+        try {
+            if ($this->isReadable() && $this->isSeekable()) {
+                $this->rewind();
+            }
 
-        if (!$this->isReadable())
+            return $this->getContents();
+        } catch (\Exception $ex) {
             return '';
-
-        if ($this->isSeekable())
-            $this->rewind();
-
-        return $this->getContents();
+        }
     }
 
     /**
-     *
+     * @throws \RuntimeException
      */
-    private function __clone() {}
+    public function __clone()
+    {
+        $this->context = null;
+        $this->metadata = null;
+        throw new RuntimeException('Streams cannot be cloned');
+    }
 }
