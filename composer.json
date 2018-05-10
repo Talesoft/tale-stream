@@ -18,7 +18,7 @@
     "autoload": {
         "psr-4": {
             "Tale\\": "src",
-            "Tale\\Test": "tests"
+            "Tale\\Test\\": "tests"
         }
     },
     "require-dev": {
