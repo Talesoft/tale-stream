@@ -22,6 +22,6 @@
         }
     },
     "require-dev": {
-        "talesoft/tale-dev-tool": "^0.2.0"
+        "talesoft/tale-dev-tool": "0.2.2"
     }
 }

@@ -18,7 +18,8 @@ class StdoutStreamTest extends TestCase
      */
     public function testConstruct()
     {
-        $stream = new StdoutStream();
+        $resource = fopen(__DIR__.'/../test-files/read-test.txt', 'ab');
+        $stream = new StdoutStream($resource);
         $this->assertTrue($stream->isWritable());
         $this->assertFalse($stream->isReadable());
     }

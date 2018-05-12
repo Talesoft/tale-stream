@@ -7,8 +7,12 @@ use Tale\Stream;
 
 class StdinStream extends Stream
 {
-    public function __construct()
+    /**
+     * StderrStream constructor.
+     * @param resource|null $stdoutResource
+     */
+    public function __construct($stdoutResource = null)
     {
-        parent::__construct(STDIN);
+        parent::__construct($stdoutResource ?: STDIN);
     }
 }

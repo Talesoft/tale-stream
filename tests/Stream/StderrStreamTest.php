@@ -18,7 +18,8 @@ class StderrStreamTest extends TestCase
      */
     public function testConstruct()
     {
-        $stream = new StderrStream();
+        $resource = fopen(__DIR__.'/../test-files/read-test.txt', 'ab');
+        $stream = new StderrStream($resource);
         $this->assertTrue($stream->isWritable());
         $this->assertFalse($stream->isReadable());
     }
