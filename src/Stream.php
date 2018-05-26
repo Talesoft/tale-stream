@@ -26,14 +26,14 @@ class Stream implements StreamInterface
      *
      * @var resource
      */
-    private $context;
+    protected $context;
 
     /**
      * An array of meta data information
      *
      * @var array
      */
-    private $metadata;
+    protected $metadata;
 
 
     /**
