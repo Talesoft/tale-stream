@@ -16,10 +16,11 @@ class OutputStreamTest extends TestCase
      * @covers ::isWritable
      * @covers ::isReadable
      */
-    public function testConstruct()
+    public function testConstruct(): void
     {
         $stream = new OutputStream();
         $this->assertTrue($stream->isWritable());
         $this->assertFalse($stream->isReadable());
+        $stream = null;
     }
 }

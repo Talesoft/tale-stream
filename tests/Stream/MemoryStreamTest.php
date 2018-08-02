@@ -16,18 +16,17 @@ class MemoryStreamTest extends TestCase
      * @covers ::isWritable
      * @covers ::isReadable
      */
-    public function testConstruct()
+    public function testConstruct(): void
     {
-        $stream = new MemoryStream('wb');
-        $this->assertTrue($stream->isWritable());
-        $this->assertTrue($stream->isReadable());
+        $stream = new MemoryStream();
+        $this->assertEquals(0, $stream->getSize());
+        $this->assertEquals(0, $stream->tell());
+        $this->assertEquals('', $stream->getContents());
 
-        $stream = new MemoryStream('rb');
-        $this->assertTrue($stream->isReadable());
-        $this->assertFalse($stream->isWritable());
-
-        $stream = new MemoryStream('rb+');
-        $this->assertTrue($stream->isReadable());
-        $this->assertTrue($stream->isWritable());
+        $stream = new MemoryStream('test');
+        $this->assertEquals(4, $stream->getSize());
+        $this->assertEquals(0, $stream->tell());
+        $this->assertEquals('test', $stream->getContents());
+        $stream = null;
     }
 }

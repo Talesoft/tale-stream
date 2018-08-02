@@ -16,11 +16,11 @@ class StdinStreamTest extends TestCase
      * @covers ::isReadable
      * @covers ::isWritable
      */
-    public function testConstruct()
+    public function testConstruct(): void
     {
-        $resource = fopen(__DIR__.'/../test-files/read-test.txt', 'rb');
-        $stream = new StdinStream($resource);
+        $stream = new StdinStream();
         $this->assertTrue($stream->isReadable());
         $this->assertFalse($stream->isWritable());
+        $stream = null;
     }
 }

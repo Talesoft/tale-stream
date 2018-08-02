@@ -16,22 +16,16 @@ class TempStreamTest extends TestCase
      * @covers ::isWritable
      * @covers ::isReadable
      */
-    public function testConstruct()
+    public function testConstruct(): void
     {
-        $stream = new TempStream('wb');
-        $this->assertTrue($stream->isWritable());
-        $this->assertTrue($stream->isReadable());
+        $stream = new TempStream();
+        $this->assertEquals(0, $stream->getSize());
+        $this->assertEquals(0, $stream->tell());
+        $this->assertEquals('', $stream->getContents());
 
-        $stream = new TempStream('rb');
-        $this->assertTrue($stream->isReadable());
-        $this->assertFalse($stream->isWritable());
-
-        $stream = new TempStream('rb+');
-        $this->assertTrue($stream->isReadable());
-        $this->assertTrue($stream->isWritable());
-
-        $stream = new TempStream('rb+', 4096);
-        $this->assertTrue($stream->isReadable());
-        $this->assertTrue($stream->isWritable());
+        $stream = new TempStream('test', 3);
+        $this->assertEquals(4, $stream->getSize());
+        $this->assertEquals(0, $stream->tell());
+        $this->assertEquals('test', $stream->getContents());
     }
 }

@@ -3,18 +3,21 @@ declare(strict_types=1);
 
 namespace Tale\Stream;
 
-use Tale\Stream;
-
-class TempStream extends Stream
+class TempStream extends FileStream
 {
-    public function __construct(?string $mode = null, ?int $maxMemory = null)
+    public function __construct(string $content = '', int $maxMemory = null)
     {
         $context = 'php://temp';
 
-        if ($maxMemory) {
+        if ($maxMemory !== null) {
             $context .= "/maxmemory:$maxMemory";
         }
 
-        parent::__construct($context, $mode);
+        parent::__construct($context, 'rb+');
+
+        if ($content !== '') {
+            $this->write($content);
+            $this->rewind();
+        }
     }
 }

@@ -3,9 +3,7 @@ declare(strict_types=1);
 
 namespace Tale;
 
-use InvalidArgumentException;
 use Psr\Http\Message\StreamInterface;
-use Psr\Http\Message\UriInterface;
 use RuntimeException;
 
 /**
@@ -15,52 +13,47 @@ use RuntimeException;
  */
 class Stream implements StreamInterface
 {
-
-    /**
-     * The default stream mode
-     */
-    public const DEFAULT_MODE = 'rb+';
-
     /**
      * The current stream context (file resource)
      *
      * @var resource
      */
-    protected $context;
+    private $resource;
 
     /**
      * An array of meta data information
      *
      * @var array
      */
-    protected $metadata;
+    private $metadata;
 
 
     /**
      * Stream constructor.
      *
-     * @param UriInterface|string|resource $context
-     * @param string|null $mode
+     * @param resource $resource
      * @throws \InvalidArgumentException
      */
-    public function __construct($context, ?string $mode = null)
+    public function __construct($resource)
     {
-        $this->context = $context;
-        $mode = $mode ?: self::DEFAULT_MODE;
-
-        if (\is_object($context) && method_exists($context, '__toString')) {
-            $this->context = (string)$this->context;
+        if (!\is_resource($resource)) {
+            throw new \InvalidArgumentException(sprintf(
+                'Argument 1 passed to %s->__construct needs to be resource, %s given',
+                static::class,
+                \gettype($resource)
+            ));
         }
 
-        if (\is_string($this->context)) {
-            $this->context = fopen($this->context, $mode);
+        if (($streamType = get_resource_type($resource)) !== 'stream') {
+            throw new \InvalidArgumentException(sprintf(
+                'Argument 1 passed to %s->__construct needs to be resource of type stream, type %s given',
+                static::class,
+                $streamType
+            ));
         }
 
-        if (!\is_resource($this->context)) {
-            throw new InvalidArgumentException('Argument 1 needs to be resource or path/URI');
-        }
-
-        $this->metadata = stream_get_meta_data($this->context);
+        $this->resource = $resource;
+        $this->metadata = stream_get_meta_data($this->resource);
     }
 
     /**
@@ -76,7 +69,7 @@ class Stream implements StreamInterface
      */
     public function close(): void
     {
-        if (!$this->context) {
+        if (!$this->resource) {
             return;
         }
 
@@ -89,8 +82,8 @@ class Stream implements StreamInterface
      */
     public function detach()
     {
-        $context = $this->context;
-        $this->context = null;
+        $context = $this->resource;
+        $this->resource = null;
         $this->metadata = null;
 
         return $context;
@@ -101,11 +94,11 @@ class Stream implements StreamInterface
      */
     public function getSize(): ?int
     {
-        if ($this->context === null) {
+        if ($this->resource === null) {
             return null;
         }
 
-        $stat = fstat($this->context);
+        $stat = fstat($this->resource);
         return (int)$stat['size'];
     }
 
@@ -114,7 +107,7 @@ class Stream implements StreamInterface
      */
     public function tell()
     {
-        return ftell($this->context);
+        return ftell($this->resource);
     }
 
     /**
@@ -122,11 +115,11 @@ class Stream implements StreamInterface
      */
     public function eof(): bool
     {
-        if (!$this->context) {
+        if (!$this->resource) {
             return true;
         }
 
-        return feof($this->context);
+        return feof($this->resource);
     }
 
     /**
@@ -134,7 +127,7 @@ class Stream implements StreamInterface
      */
     public function isSeekable(): bool
     {
-        if (!$this->context) {
+        if (!$this->resource) {
             return false;
         }
 
@@ -150,7 +143,7 @@ class Stream implements StreamInterface
             throw new RuntimeException('Stream is not seekable');
         }
 
-        fseek($this->context, $offset, $whence);
+        fseek($this->resource, $offset, $whence);
         return true;
     }
 
@@ -167,7 +160,7 @@ class Stream implements StreamInterface
      */
     public function isWritable(): bool
     {
-        if (!$this->context) {
+        if (!$this->resource) {
             return false;
         }
 
@@ -186,7 +179,7 @@ class Stream implements StreamInterface
             throw new RuntimeException('Stream is not writable');
         }
 
-        return fwrite($this->context, $string);
+        return fwrite($this->resource, $string);
     }
 
     /**
@@ -194,7 +187,7 @@ class Stream implements StreamInterface
      */
     public function isReadable(): bool
     {
-        if (!$this->context) {
+        if (!$this->resource) {
             return false;
         }
 
@@ -211,7 +204,7 @@ class Stream implements StreamInterface
             throw new RuntimeException('Stream is not readable');
         }
 
-        return fread($this->context, $length);
+        return fread($this->resource, $length);
     }
 
     /**
@@ -223,7 +216,7 @@ class Stream implements StreamInterface
             throw new RuntimeException('Stream is not readable');
         }
 
-        return stream_get_contents($this->context);
+        return stream_get_contents($this->resource);
     }
 
     /**
@@ -251,7 +244,6 @@ class Stream implements StreamInterface
             if ($this->isReadable() && $this->isSeekable()) {
                 $this->rewind();
             }
-
             return $this->getContents();
         } catch (\Exception $ex) {
             return '';
@@ -263,7 +255,7 @@ class Stream implements StreamInterface
      */
     public function __clone()
     {
-        $this->context = null;
+        $this->resource = null;
         $this->metadata = null;
         throw new RuntimeException('Streams cannot be cloned');
     }

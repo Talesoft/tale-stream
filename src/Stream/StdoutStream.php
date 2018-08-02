@@ -3,16 +3,13 @@ declare(strict_types=1);
 
 namespace Tale\Stream;
 
-use Tale\Stream;
-
-class StdoutStream extends Stream
+class StdoutStream extends FileStream
 {
     /**
-     * StderrStream constructor.
-     * @param resource|null $stdoutResource
+     * StdoutStream constructor.
      */
-    public function __construct($stdoutResource = null)
+    public function __construct()
     {
-        parent::__construct($stdoutResource ?: STDOUT);
+        parent::__construct('php://stdin', 'wb');
     }
 }

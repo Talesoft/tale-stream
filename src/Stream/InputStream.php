@@ -3,9 +3,7 @@ declare(strict_types=1);
 
 namespace Tale\Stream;
 
-use Tale\Stream;
-
-class InputStream extends Stream
+class InputStream extends FileStream
 {
     public function __construct()
     {
