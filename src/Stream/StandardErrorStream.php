@@ -3,13 +3,13 @@ declare(strict_types=1);
 
 namespace Tale\Stream;
 
-class StdinStream extends FileStream
+class StandardErrorStream extends FileStream
 {
     /**
      * StderrStream constructor.
      */
     public function __construct()
     {
-        parent::__construct('php://stdin', 'rb');
+        parent::__construct('php://stderr', 'wb');
     }
 }

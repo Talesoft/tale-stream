@@ -13,6 +13,10 @@ use RuntimeException;
  */
 class Stream implements StreamInterface
 {
+    public const SEEK_START = \SEEK_SET;
+    public const SEEK_CURRENT = \SEEK_CUR;
+    public const SEEK_END = \SEEK_END;
+
     /**
      * The current stream context (file resource)
      *
@@ -137,7 +141,7 @@ class Stream implements StreamInterface
     /**
      * {@inheritdoc}
      */
-    public function seek($offset, $whence = \SEEK_SET): bool
+    public function seek($offset, $whence = self::SEEK_START): bool
     {
         if (!$this->isSeekable()) {
             throw new RuntimeException('Stream is not seekable');

@@ -3,7 +3,7 @@ declare(strict_types=1);
 
 namespace Tale\Stream;
 
-class StdoutStream extends FileStream
+class StandardOutputStream extends FileStream
 {
     /**
      * StdoutStream constructor.

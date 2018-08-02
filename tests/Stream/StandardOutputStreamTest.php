@@ -4,12 +4,12 @@ declare(strict_types=1);
 namespace Tale\Test\Stream;
 
 use PHPUnit\Framework\TestCase;
-use Tale\Stream\StderrStream;
+use Tale\Stream\StandardOutputStream;
 
 /**
- * @coversDefaultClass \Tale\Stream\StderrStream
+ * @coversDefaultClass \Tale\Stream\StandardOutputStream
  */
-class StderrStreamTest extends TestCase
+class StandardOutputStreamTest extends TestCase
 {
     /**
      * @covers ::__construct
@@ -18,7 +18,7 @@ class StderrStreamTest extends TestCase
      */
     public function testConstruct(): void
     {
-        $stream = new StderrStream();
+        $stream = new StandardOutputStream();
         $this->assertTrue($stream->isWritable());
         $this->assertFalse($stream->isReadable());
         $stream = null;
