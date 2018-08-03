@@ -28,7 +28,7 @@ Usage
 ```php
 use Tale\Stream;
 
-$stream = new Stream('/some/file');
+$stream = new Stream(fopen('/some/file', 'rb+'));
 
 if ($stream->isReadable()) {
     $contents = $stream->read(100);
@@ -40,10 +40,28 @@ if ($stream->isWritable()) {
     
 ```
 
-# Available Streams
+### Using the factory
 
+```php
+use Tale\Stream\Factory;
+
+$factory = new Factory();
+
+$stream = $factory->createStream('some stream content');
+
+$stream = $factory->createStreamFromFile('/some/file', 'rb+');
+
+$stream = $factory->createStreamFromResource(fopen('/some/file', 'rb+'));
+```
+
+## Available Streams
+
+- `Tale\Stream\FileStream` -> Same API as `fopen`
 - `Tale\Stream\InputStream` -> php://input, rb
 - `Tale\Stream\OutputStream` -> php://output, wb
-- `Tale\Stream\MemoryStream` -> php://memory, wb+
-- `Tale\Stream\TempStream` -> php://temp, wb+
-- `Tale\Stream\StringStream` -> MemoryStream with initial content via constructor
+- `Tale\Stream\MemoryStream` -> php://memory, rb+
+- `Tale\Stream\TempStream` -> php://temp, rb+
+- `Tale\Stream\NullStream` -> Empty readable, writable and seekable stream that implements the interfaces, but does nothing at all
+- `Tale\Stream\StandardErrorStream` -> STDERR wrapper
+- `Tale\Stream\StandardInputStream` -> STDIN wrapper
+- `Tale\Stream\StandardOutputStream` -> STDOUT wrapper

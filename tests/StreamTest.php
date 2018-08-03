@@ -61,6 +61,7 @@ class StreamTest extends TestCase
     /**
      * @covers ::__construct
      * @dataProvider badConstructorUriProvider
+     * @param $parameter
      */
     public function testConstructThrowsExceptionWithBadParameters($parameter): void
     {
@@ -382,7 +383,6 @@ class StreamTest extends TestCase
     public function testCloneThrowsException(): void
     {
         $this->expectException(RuntimeException::class);
-
         $stream = new Stream(fopen(self::READ_RESOURCE, 'rb'));
         $clone = clone $stream;
     }
