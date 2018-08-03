@@ -4,7 +4,10 @@ declare(strict_types=1);
 namespace Tale;
 
 use Psr\Http\Message\StreamInterface;
-use RuntimeException;
+use Tale\Stream\Exception\InvalidOperationException;
+use Tale\Stream\Exception\NotReadableException;
+use Tale\Stream\Exception\NotSeekableException;
+use Tale\Stream\Exception\NotWritableException;
 
 /**
  * Class Stream
@@ -144,7 +147,7 @@ class Stream implements StreamInterface
     public function seek($offset, $whence = self::SEEK_START): bool
     {
         if (!$this->isSeekable()) {
-            throw new RuntimeException('Stream is not seekable');
+            throw new NotSeekableException('Stream is not seekable');
         }
 
         fseek($this->resource, $offset, $whence);
@@ -180,7 +183,7 @@ class Stream implements StreamInterface
     public function write($string)
     {
         if (!$this->isWritable()) {
-            throw new RuntimeException('Stream is not writable');
+            throw new NotWritableException('Stream is not writable');
         }
 
         return fwrite($this->resource, $string);
@@ -205,7 +208,7 @@ class Stream implements StreamInterface
     public function read($length)
     {
         if (!$this->isReadable()) {
-            throw new RuntimeException('Stream is not readable');
+            throw new NotReadableException('Stream is not readable');
         }
 
         return fread($this->resource, $length);
@@ -217,7 +220,7 @@ class Stream implements StreamInterface
     public function getContents(): string
     {
         if (!$this->isReadable()) {
-            throw new RuntimeException('Stream is not readable');
+            throw new NotReadableException('Stream is not readable');
         }
 
         return stream_get_contents($this->resource);
@@ -249,7 +252,7 @@ class Stream implements StreamInterface
                 $this->rewind();
             }
             return $this->getContents();
-        } catch (\Exception $ex) {
+        } catch (\Throwable $ex) {
             return '';
         }
     }
@@ -261,6 +264,6 @@ class Stream implements StreamInterface
     {
         $this->resource = null;
         $this->metadata = null;
-        throw new RuntimeException('Streams cannot be cloned');
+        throw new \RuntimeException('Streams cannot be cloned');
     }
 }
