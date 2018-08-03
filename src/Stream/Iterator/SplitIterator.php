@@ -3,8 +3,6 @@ declare(strict_types=1);
 
 namespace Tale\Stream\Iterator;
 
-use Tale\Stream;
-
 class SplitIterator implements \IteratorAggregate
 {
     private $readIterator;
@@ -39,44 +37,42 @@ class SplitIterator implements \IteratorAggregate
 
     /**
      * @param string $delimiter
-     * @return SplitIterator
+     * @return $this
      */
-    public function setDelimiter(string $delimiter): SplitIterator
+    public function setDelimiter(string $delimiter): self
     {
         $this->delimiter = $delimiter;
         return $this;
     }
-
 
     /**
      * @return \Generator|string[]
      */
     public function getIterator(): \Generator
     {
-        $line = null;
-        $delimLen = \strlen($this->delimiter);
-        $stream = $this->readIterator->getStream();
+        $line = '';
         foreach ($this->readIterator as $content) {
-            $pos = strpos($content, $this->delimiter);
+            $parts = explode($this->delimiter, $content);
+            $partCount = \count($parts);
+            if ($partCount > 1) {
+                foreach ($parts as $i => $part) {
+                    if ($i === 0) {
+                        yield $line.$part;
+                        continue;
+                    }
 
-            if ($line === null) {
-                $line = '';
-            }
+                    if ($i === $partCount - 1) {
+                        $line = $part;
+                        continue;
+                    }
 
-            if ($pos === -1) {
-                $line .= $content;
+                    yield $part;
+                }
                 continue;
             }
 
-            $restLen = \strlen($content) - ($pos + $delimLen);
-            $stream->seek(-$restLen, Stream::SEEK_CURRENT);
-            $line .= substr($content, 0, $pos);
-            yield $line;
-            $line = null;
+            $line .= $content;
         }
-
-        if ($line !== null) {
-            yield $line;
-        }
+        yield $line;
     }
 }

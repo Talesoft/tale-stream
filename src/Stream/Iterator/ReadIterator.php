@@ -21,7 +21,6 @@ class ReadIterator implements \IteratorAggregate
         if (!$stream->isReadable()) {
             throw new NotReadableException('Stream is not readable');
         }
-
         $this->stream = $stream;
         $this->chunkSize = $chunkSize;
     }
@@ -52,9 +51,16 @@ class ReadIterator implements \IteratorAggregate
         return $this;
     }
 
-    /**
-     * @return \Generator|string[]
-     */
+    public function eof(): bool
+    {
+        return $this->stream->eof();
+    }
+
+    public function rewind(): void
+    {
+        $this->stream->rewind();
+    }
+
     public function getIterator(): \Generator
     {
         while (!$this->stream->eof()) {

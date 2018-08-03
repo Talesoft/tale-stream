@@ -185,7 +185,7 @@ class StreamTest extends TestCase
      */
     public function testSeekThrowsExceptionWhenNotSeekable(): void
     {
-        $this->expectException(RuntimeException::class);
+        $this->expectException(Stream\Exception\NotSeekableException::class);
 
         $stream = new Stream(fopen(self::HTTP_RESOURCE, 'rb'));
         $stream->seek(5);
@@ -210,7 +210,7 @@ class StreamTest extends TestCase
      */
     public function testRewindThrowsExceptionWhenNotSeekable(): void
     {
-        $this->expectException(RuntimeException::class);
+        $this->expectException(Stream\Exception\NotSeekableException::class);
 
         $stream = new Stream(fopen(self::HTTP_RESOURCE, 'rb'));
         $stream->rewind();
@@ -258,7 +258,7 @@ class StreamTest extends TestCase
      */
     public function testWriteThrowsExceptionWhenNotWritable(): void
     {
-        $this->expectException(RuntimeException::class);
+        $this->expectException(Stream\Exception\NotWritableException::class);
 
         $stream = new Stream(fopen(self::READ_RESOURCE, 'rb'));
         $stream->write('Test String');
@@ -308,7 +308,7 @@ class StreamTest extends TestCase
      */
     public function testReadThrowsExceptionWhenNotReadable(): void
     {
-        $this->expectException(RuntimeException::class);
+        $this->expectException(Stream\Exception\NotReadableException::class);
 
         $stream = new Stream(fopen(self::READ_RESOURCE, 'ab'));
         $stream->read(4);
