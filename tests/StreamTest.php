@@ -78,7 +78,8 @@ class StreamTest extends TestCase
             [new class {
             }],
             [['test']],
-            ['test']
+            ['test'],
+            [stream_context_create()]
         ];
     }
 
