@@ -9,12 +9,11 @@ use Tale\Stream\NullStream;
 use Tale\Stream\StandardErrorStream;
 
 /**
- * @coversDefaultClass \Tale\Stream\StandardErrorStream
+ * @coversDefaultClass \Tale\Stream\NullStream
  */
 class NullStreamTest extends TestCase
 {
     /**
-     * @covers ::__construct
      * @covers ::tell
      * @covers ::getSize
      * @covers ::getContents
@@ -29,6 +28,7 @@ class NullStreamTest extends TestCase
      * @covers ::rewind
      * @covers ::seek
      * @covers ::write
+     * @covers ::__toString
      */
     public function testMethodReturnValues(): void
     {
@@ -48,5 +48,16 @@ class NullStreamTest extends TestCase
         $this->assertTrue($stream->rewind());
         $this->assertTrue($stream->seek(15, Stream::SEEK_CURRENT));
         $this->assertEquals(4, $stream->write('test'));
+        $this->assertEquals('', (string)$stream);
+    }
+
+    /**
+     * @covers ::__clone
+     * @expectedException \RuntimeException
+     */
+    public function testCloneThrowsException(): void
+    {
+        $stream = new NullStream();
+        $clonedStream = clone $stream;
     }
 }

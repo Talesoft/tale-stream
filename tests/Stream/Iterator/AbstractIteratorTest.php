@@ -11,7 +11,6 @@ abstract class AbstractIteratorTest extends TestCase
     {
         $loops = 0;
         foreach ($iterator as $i => $item) {
-
             $this->assertArrayHasKey($i, $values);
             $this->assertEquals($values[$i], $item);
             $loops++;
