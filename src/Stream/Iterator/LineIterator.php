@@ -3,19 +3,23 @@ declare(strict_types=1);
 
 namespace Tale\Stream\Iterator;
 
+use Psr\Http\Message\StreamInterface;
+
 class LineIterator extends SplitIterator
 {
     public const DELIMITER_CR = "\r";
     public const DELIMITER_LF = "\n";
     public const DELIMITER_CRLF = "\r\n";
+
     /**
      * ReadIterator constructor.
-     * @param ReadIterator $readIterator
+     * @param StreamInterface $stream
      * @param string $delimiter
+     * @param int $chunkSize
      */
-    public function __construct(ReadIterator $readIterator, string $delimiter = self::DELIMITER_LF)
+    public function __construct(StreamInterface $stream, string $delimiter = self::DELIMITER_LF, int $chunkSize = 2048)
     {
-        parent::__construct($readIterator, $delimiter);
+        parent::__construct($stream, $delimiter, $chunkSize);
     }
 
     /**

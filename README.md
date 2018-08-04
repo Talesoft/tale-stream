@@ -54,7 +54,112 @@ $stream = $factory->createStreamFromFile('/some/file', 'rb+');
 $stream = $factory->createStreamFromResource(fopen('/some/file', 'rb+'));
 ```
 
-## Available Streams
+### Using the iterators
+
+ReadIterator will read a stream chunk-by-chunk (default chunk size is 1024)
+
+```php
+use Tale\Stream\MemoryStream;
+use Tale\Stream\Iterator\ReadIterator;
+
+$stream = new MemoryStream('abcdefg');
+
+$reader = new ReadIterator($stream, 2);
+
+foreach ($reader as $chunk) {
+    var_dump($chunk); //0 => ab, 1 => cd, 2 => ef, 3 => g
+}
+```
+
+SplitIterator will split the content by a delimiter and yield item-by-item
+
+```php
+use Tale\Stream\MemoryStream;
+use Tale\Stream\Iterator\ReadIterator;
+use Tale\Stream\Iterator\SplitIterator;
+
+$stream = new MemoryStream('ab|cd|ef|g');
+
+$reader = new SplitIterator($stream, '|');
+
+foreach ($reader as $item) {
+    var_dump($item); //0 => ab, 1 => cd, 2 => ef, 3 => g
+}
+```
+
+LineIterator will split the stream content by lines and yield line-by-line
+
+```php
+
+use Tale\Stream\MemoryStream;
+use Tale\Stream\Iterator\ReadIterator;
+use Tale\Stream\Iterator\LineIterator;
+
+$stream = new MemoryStream("ab\ncd\nde\ng");
+
+$reader = new LineIterator($stream);
+
+foreach ($reader as $item) {
+    var_dump($item); //0 => ab, 1 => cd, 2 => ef, 3 => g
+}
+```
+
+### Piping streams with iterators
+
+WriteIterator allows to pipe and filter streams easily and efficiently.
+
+```php
+use Tale\Stream\MemoryStream;
+use Tale\Stream\Iterator\ReadIterator;
+use Tale\Stream\Iterator\WriteIterator;
+
+$inputStream = new MemoryStream();
+$outputStream = new MemoryStream();
+$chunkSize = 2048;
+
+$pipe = new WriteIterator($outputStream, new ReadIterator($inputStream, $chunkSize));
+foreach ($pipe as $writtenBytes) { //The actual piping process, chunk-by-chunk
+    echo "Wrote {$writtenBytes} bytes";
+}
+
+//alternatively you can use iterator_to_array to pipe the whole stream at once
+$writtenBytesArray = iterator_to_array($pipe);
+```
+
+Using iterators you can filter streams during piping in many different ways
+
+```php
+use CallbackFilterIterator;
+use Tale\Iterator\SuffixIterator; //requires talesoft/tale-iterator
+use Tale\Stream\MemoryStream;
+use Tale\Stream\Iterator\ReadIterator;
+use Tale\Stream\Iterator\WriteIterator;
+use Tale\Stream\Iterator\LineIterator;
+
+$inputStream = new MemoryStream("ab\ncd\nde\ng");
+
+//Use a LineIterator to cleanly read lines
+$reader = new LineIterator($inputStream);
+
+//Will filter all lines that match "de"
+$filteredReader = new CallbackFilterIterator($reader, function (string $line) {
+    return $line !== 'de';
+});
+
+//Will add "\n" to all lines
+$lfSuffixer = new SuffixIterator($filteredReader, "\n");
+
+$outputStream = new MemoryStream();
+
+$pipe = new WriteIterator($outputStream, $lfSuffixer);
+$writtenBytes = iterator_to_array($pipe); //The actual piping process, chunk-by-chunk
+
+var_dump((string)$outputStream); //"ab\ncd\ng"
+```
+
+
+
+### Available Streams
 
 - `Tale\Stream\FileStream` -> Same API as `fopen`
 - `Tale\Stream\InputStream` -> php://input, rb

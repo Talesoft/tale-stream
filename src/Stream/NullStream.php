@@ -39,7 +39,7 @@ class NullStream implements StreamInterface
     /**
      * {@inheritdoc}
      */
-    public function tell()
+    public function tell(): int
     {
         return 0;
     }
@@ -63,17 +63,15 @@ class NullStream implements StreamInterface
     /**
      * {@inheritdoc}
      */
-    public function seek($offset, $whence = \SEEK_SET): bool
+    public function seek($offset, $whence = \SEEK_SET): void
     {
-        return true;
     }
 
     /**
      * {@inheritdoc}
      */
-    public function rewind(): bool
+    public function rewind(): void
     {
-        return true;
     }
 
     /**
@@ -103,9 +101,9 @@ class NullStream implements StreamInterface
     /**
      * {@inheritdoc}
      */
-    public function read($length)
+    public function read($length): string
     {
-        return false;
+        return '';
     }
 
     /**

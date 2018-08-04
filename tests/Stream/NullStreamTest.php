@@ -44,9 +44,9 @@ class NullStreamTest extends TestCase
         $this->assertTrue($stream->isReadable());
         $this->assertTrue($stream->isSeekable());
         $this->assertTrue($stream->isWritable());
-        $this->assertFalse($stream->read(15));
-        $this->assertTrue($stream->rewind());
-        $this->assertTrue($stream->seek(15, Stream::SEEK_CURRENT));
+        $this->assertEquals('', $stream->read(15));
+        $stream->rewind();
+        $stream->seek(15, Stream::SEEK_CURRENT);
         $this->assertEquals(4, $stream->write('test'));
         $this->assertEquals('', (string)$stream);
     }

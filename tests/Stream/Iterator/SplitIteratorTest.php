@@ -16,7 +16,6 @@ class SplitIteratorTest extends AbstractIteratorTest
 {
     /**
      * @covers ::__construct
-     * @covers ::getReadIterator
      * @covers ::getDelimiter
      * @covers ::setDelimiter
      * @covers ::getIterator
@@ -25,10 +24,8 @@ class SplitIteratorTest extends AbstractIteratorTest
     {
         for ($i = 1; $i <= 10; $i++) {
             $stream = new TempStream('a,b,c,d');
-            $readIterator = new ReadIterator($stream, $i);
-            $iterator = new SplitIterator($readIterator, '|');
+            $iterator = new SplitIterator($stream, '|', $i);
 
-            $this->assertEquals($readIterator, $iterator->getReadIterator());
             $this->assertEquals('|', $iterator->getDelimiter());
             $this->assertSame($iterator, $iterator->setDelimiter(','));
             $this->assertEquals(',', $iterator->getDelimiter());

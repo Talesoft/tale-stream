@@ -161,23 +161,23 @@ class StreamTest extends TestCase
     {
         //Default should be SEEK_SET
         $stream = new Stream(fopen(self::READ_RESOURCE, 'rb'));
-        $this->assertTrue($stream->seek(2));
-        $this->assertTrue($stream->seek(8));
+        $stream->seek(2, Stream::SEEK_START);
+        $stream->seek(8, Stream::SEEK_START);
         $this->assertEquals(8, $stream->tell());
 
         $stream = new Stream(fopen(self::READ_RESOURCE, 'rb'));
-        $this->assertTrue($stream->seek(2, SEEK_SET));
-        $this->assertTrue($stream->seek(8, SEEK_SET));
+        $stream->seek(2, Stream::SEEK_START);
+        $stream->seek(8, Stream::SEEK_START);
         $this->assertEquals(8, $stream->tell());
 
         $stream = new Stream(fopen(self::READ_RESOURCE, 'rb'));
-        $this->assertTrue($stream->seek(-3, SEEK_END));
-        $this->assertTrue($stream->seek(-8, SEEK_END));
+        $stream->seek(-3, Stream::SEEK_END);
+        $stream->seek(-8, Stream::SEEK_END);
         $this->assertEquals(22, $stream->tell());
 
         $stream = new Stream(fopen(self::READ_RESOURCE, 'rb'));
-        $this->assertTrue($stream->seek(8, SEEK_CUR));
-        $this->assertTrue($stream->seek(4, SEEK_CUR));
+        $stream->seek(8, Stream::SEEK_CURRENT);
+        $stream->seek(4, Stream::SEEK_CURRENT);
         $this->assertEquals(12, $stream->tell());
     }
 
@@ -200,9 +200,9 @@ class StreamTest extends TestCase
     public function testRewind(): void
     {
         $stream = new Stream(fopen(self::READ_RESOURCE, 'rb'));
-        $this->assertTrue($stream->seek(8));
+        $stream->seek(8);
         $this->assertEquals(8, $stream->tell());
-        $this->assertTrue($stream->rewind());
+        $stream->rewind();
         $this->assertEquals(0, $stream->tell());
     }
 
@@ -213,7 +213,6 @@ class StreamTest extends TestCase
     public function testRewindThrowsExceptionWhenNotSeekable(): void
     {
         $this->expectException(Stream\Exception\NotSeekableException::class);
-
         $stream = new Stream(fopen(self::HTTP_RESOURCE, 'rb'));
         $stream->rewind();
     }
@@ -299,7 +298,7 @@ class StreamTest extends TestCase
         $this->assertEquals('This is', $stream->read(7));
         $this->assertEquals("\n", $stream->read(1));
         $this->assertEquals("some\n", $stream->read(5));
-        $this->assertTrue($stream->seek(-5, SEEK_CUR));
+        $stream->seek(-5, Stream::SEEK_CURRENT);
         $this->assertEquals("some\n", $stream->read(5));
         $stream = null;
     }

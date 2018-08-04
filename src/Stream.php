@@ -4,7 +4,6 @@ declare(strict_types=1);
 namespace Tale;
 
 use Psr\Http\Message\StreamInterface;
-use Tale\Stream\Exception\InvalidOperationException;
 use Tale\Stream\Exception\NotReadableException;
 use Tale\Stream\Exception\NotSeekableException;
 use Tale\Stream\Exception\NotWritableException;
@@ -112,9 +111,13 @@ class Stream implements StreamInterface
     /**
      * {@inheritdoc}
      */
-    public function tell()
+    public function tell(): int
     {
-        return ftell($this->resource);
+        $offset = ftell($this->resource);
+        if ($offset === false) {
+            throw new \RuntimeException('Failed to tell stream position. Maybe the resource is closed or invalid?');
+        }
+        return $offset;
     }
 
     /**
@@ -144,22 +147,23 @@ class Stream implements StreamInterface
     /**
      * {@inheritdoc}
      */
-    public function seek($offset, $whence = self::SEEK_START): bool
+    public function seek($offset, $whence = self::SEEK_START): void
     {
         if (!$this->isSeekable()) {
             throw new NotSeekableException('Stream is not seekable');
         }
 
-        fseek($this->resource, $offset, $whence);
-        return true;
+        if (fseek($this->resource, $offset, $whence) === -1) {
+            throw new \RuntimeException('Failed to seek stream: Maybe the resource is closed or invalid?');
+        }
     }
 
     /**
      * {@inheritdoc}
      */
-    public function rewind(): bool
+    public function rewind(): void
     {
-        return $this->seek(0);
+        $this->seek(0);
     }
 
     /**
@@ -180,13 +184,16 @@ class Stream implements StreamInterface
     /**
      * {@inheritdoc}
      */
-    public function write($string)
+    public function write($string): int
     {
         if (!$this->isWritable()) {
             throw new NotWritableException('Stream is not writable');
         }
 
-        return fwrite($this->resource, $string);
+        if (($writtenBytes = fwrite($this->resource, $string)) === false) {
+            throw new \RuntimeException('Failed to write stream. Maybe the resource is closed or invalid?');
+        }
+        return $writtenBytes;
     }
 
     /**
@@ -205,13 +212,15 @@ class Stream implements StreamInterface
     /**
      * {@inheritdoc}
      */
-    public function read($length)
+    public function read($length): string
     {
         if (!$this->isReadable()) {
             throw new NotReadableException('Stream is not readable');
         }
-
-        return fread($this->resource, $length);
+        if (($content = fread($this->resource, $length)) === false) {
+            throw new \RuntimeException('Failed to read stream. Maybe the resource is closed or invalid?');
+        }
+        return $content;
     }
 
     /**
@@ -245,7 +254,7 @@ class Stream implements StreamInterface
     /**
      * {@inheritdoc}
      */
-    public function __toString()
+    public function __toString(): string
     {
         try {
             if ($this->isReadable() && $this->isSeekable()) {

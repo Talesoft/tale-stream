@@ -3,28 +3,25 @@ declare(strict_types=1);
 
 namespace Tale\Stream\Iterator;
 
-class SplitIterator implements \IteratorAggregate
+use Psr\Http\Message\StreamInterface;
+
+class SplitIterator extends ReadIterator
 {
-    private $readIterator;
+    /**
+     * @var string
+     */
     private $delimiter;
 
     /**
      * ReadIterator constructor.
-     * @param ReadIterator $readIterator
+     * @param StreamInterface $stream
      * @param string $delimiter
+     * @param int $chunkSize
      */
-    public function __construct(ReadIterator $readIterator, string $delimiter)
+    public function __construct(StreamInterface $stream, string $delimiter, int $chunkSize = 2048)
     {
-        $this->readIterator = $readIterator;
+        parent::__construct($stream, $chunkSize);
         $this->delimiter = $delimiter;
-    }
-
-    /**
-     * @return ReadIterator
-     */
-    public function getReadIterator(): ReadIterator
-    {
-        return $this->readIterator;
     }
 
     /**
@@ -51,7 +48,7 @@ class SplitIterator implements \IteratorAggregate
     public function getIterator(): \Generator
     {
         $line = '';
-        foreach ($this->readIterator as $content) {
+        foreach (parent::getIterator() as $content) {
             $parts = explode($this->delimiter, $content);
             $partCount = \count($parts);
             if ($partCount > 1) {
