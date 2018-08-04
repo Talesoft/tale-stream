@@ -63,8 +63,13 @@ class ReadIterator implements \IteratorAggregate
 
     public function getIterator(): \Generator
     {
+        var_dump("Stream Size: {$this->getStream()->getSize()}");
+        var_dump("Chunk Size: {$this->getChunkSize()}");
         while (!$this->stream->eof()) {
-            yield $this->stream->read($this->chunkSize);
+            var_dump('EOF: ' .($this->stream->eof() ? 'TRUE' : 'FALSE'));
+            $item = $this->stream->read($this->chunkSize);
+            var_dump('ITEM: '.$item);
+            yield $item;
         }
     }
 }
