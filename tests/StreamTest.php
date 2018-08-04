@@ -117,6 +117,19 @@ class StreamTest extends TestCase
 
     /**
      * @covers ::__construct
+     * @covers ::tell
+     * @expectedException \Tale\Stream\Exception\ResourceClosedException
+     */
+    public function testTellThrowsExceptionOnClosedResource(): void
+    {
+        $resource = fopen(self::READ_RESOURCE, 'rb');
+        $stream = new Stream($resource);
+        fclose($resource);
+        $stream->tell();
+    }
+
+    /**
+     * @covers ::__construct
      * @covers ::eof
      * @covers ::seek
      * @covers ::read
@@ -179,6 +192,19 @@ class StreamTest extends TestCase
         $stream->seek(8, Stream::SEEK_CURRENT);
         $stream->seek(4, Stream::SEEK_CURRENT);
         $this->assertEquals(12, $stream->tell());
+    }
+
+    /**
+     * @covers ::__construct
+     * @covers ::seek
+     * @expectedException \Tale\Stream\Exception\ResourceClosedException
+     */
+    public function testSeekThrowsExceptionOnClosedResource(): void
+    {
+        $resource = fopen(self::READ_RESOURCE, 'rb');
+        $stream = new Stream($resource);
+        fclose($resource);
+        $stream->seek(0);
     }
 
     /**
@@ -267,6 +293,19 @@ class StreamTest extends TestCase
 
     /**
      * @covers ::__construct
+     * @covers ::write
+     * @expectedException \Tale\Stream\Exception\ResourceClosedException
+     */
+    public function testWriteThrowsExceptionOnClosedResource(): void
+    {
+        $resource = fopen(self::READ_RESOURCE, 'rb');
+        $stream = new Stream($resource);
+        fclose($resource);
+        $stream->write('');
+    }
+
+    /**
+     * @covers ::__construct
      * @covers ::isReadable
      */
     public function testIsReadable(): void
@@ -306,6 +345,19 @@ class StreamTest extends TestCase
     /**
      * @covers ::__construct
      * @covers ::read
+     * @expectedException \Tale\Stream\Exception\ResourceClosedException
+     */
+    public function testReadThrowsExceptionOnClosedResource(): void
+    {
+        $resource = fopen(self::READ_RESOURCE, 'rb');
+        $stream = new Stream($resource);
+        fclose($resource);
+        $stream->read(10);
+    }
+
+    /**
+     * @covers ::__construct
+     * @covers ::read
      */
     public function testReadThrowsExceptionWhenNotReadable(): void
     {
@@ -340,6 +392,19 @@ class StreamTest extends TestCase
         $this->expectException(RuntimeException::class);
 
         $stream = new Stream(fopen(self::READ_RESOURCE, 'ab'));
+        $stream->getContents();
+    }
+
+    /**
+     * @covers ::__construct
+     * @covers ::getContents
+     * @expectedException \Tale\Stream\Exception\ResourceClosedException
+     */
+    public function testGetContentsThrowsExceptionOnClosedResource(): void
+    {
+        $resource = fopen(self::READ_RESOURCE, 'rb');
+        $stream = new Stream($resource);
+        fclose($resource);
         $stream->getContents();
     }
 

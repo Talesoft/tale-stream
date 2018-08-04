@@ -7,6 +7,8 @@ use Psr\Http\Message\StreamInterface;
 use Tale\Stream\Exception\NotReadableException;
 use Tale\Stream\Exception\NotSeekableException;
 use Tale\Stream\Exception\NotWritableException;
+use Tale\Stream\Exception\ResourceClosedException;
+use Tale\Stream\Exception\ResourceInvalidException;
 
 /**
  * Class Stream
@@ -75,7 +77,7 @@ class Stream implements StreamInterface
      */
     public function close(): void
     {
-        if (!$this->resource) {
+        if (!\is_resource($this->resource)) {
             return;
         }
 
@@ -100,7 +102,7 @@ class Stream implements StreamInterface
      */
     public function getSize(): ?int
     {
-        if ($this->resource === null) {
+        if (!\is_resource($this->resource)) {
             return null;
         }
 
@@ -113,9 +115,12 @@ class Stream implements StreamInterface
      */
     public function tell(): int
     {
+        if (!\is_resource($this->resource)) {
+            throw new ResourceClosedException('Failed to tell stream position. Resource is closed.');
+        }
         $offset = ftell($this->resource);
         if ($offset === false) {
-            throw new \RuntimeException('Failed to tell stream position. Maybe the resource is closed or invalid?');
+            throw new ResourceInvalidException('Failed to tell stream position. Resource is invalid.');
         }
         return $offset;
     }
@@ -125,7 +130,7 @@ class Stream implements StreamInterface
      */
     public function eof(): bool
     {
-        if (!$this->resource) {
+        if (!\is_resource($this->resource)) {
             return true;
         }
 
@@ -137,7 +142,7 @@ class Stream implements StreamInterface
      */
     public function isSeekable(): bool
     {
-        if (!$this->resource) {
+        if (!\is_resource($this->resource)) {
             return false;
         }
 
@@ -149,12 +154,16 @@ class Stream implements StreamInterface
      */
     public function seek($offset, $whence = self::SEEK_START): void
     {
+        if (!\is_resource($this->resource)) {
+            throw new ResourceClosedException('Failed to seek. Resource is closed.');
+        }
+
         if (!$this->isSeekable()) {
             throw new NotSeekableException('Stream is not seekable');
         }
 
         if (fseek($this->resource, $offset, $whence) === -1) {
-            throw new \RuntimeException('Failed to seek stream: Maybe the resource is closed or invalid?');
+            throw new ResourceInvalidException('Failed to seek stream: Maybe the resource is closed or invalid?');
         }
     }
 
@@ -171,7 +180,7 @@ class Stream implements StreamInterface
      */
     public function isWritable(): bool
     {
-        if (!$this->resource) {
+        if (!\is_resource($this->resource)) {
             return false;
         }
 
@@ -186,12 +195,16 @@ class Stream implements StreamInterface
      */
     public function write($string): int
     {
+        if (!\is_resource($this->resource)) {
+            throw new ResourceClosedException('Failed to write. Resource is closed.');
+        }
+
         if (!$this->isWritable()) {
             throw new NotWritableException('Stream is not writable');
         }
 
         if (($writtenBytes = fwrite($this->resource, $string)) === false) {
-            throw new \RuntimeException('Failed to write stream. Maybe the resource is closed or invalid?');
+            throw new ResourceInvalidException('Failed to write stream. Resource is invalid.');
         }
         return $writtenBytes;
     }
@@ -201,7 +214,7 @@ class Stream implements StreamInterface
      */
     public function isReadable(): bool
     {
-        if (!$this->resource) {
+        if (!\is_resource($this->resource)) {
             return false;
         }
 
@@ -214,11 +227,16 @@ class Stream implements StreamInterface
      */
     public function read($length): string
     {
+        if (!\is_resource($this->resource)) {
+            throw new ResourceClosedException('Failed to read. Resource is closed.');
+        }
+
         if (!$this->isReadable()) {
             throw new NotReadableException('Stream is not readable');
         }
+
         if (($content = fread($this->resource, $length)) === false) {
-            throw new \RuntimeException('Failed to read stream. Maybe the resource is closed or invalid?');
+            throw new ResourceInvalidException('Failed to read stream. Resource is invalid.');
         }
         return $content;
     }
@@ -228,6 +246,10 @@ class Stream implements StreamInterface
      */
     public function getContents(): string
     {
+        if (!\is_resource($this->resource)) {
+            throw new ResourceClosedException('Failed to write. Resource is closed.');
+        }
+
         if (!$this->isReadable()) {
             throw new NotReadableException('Stream is not readable');
         }
