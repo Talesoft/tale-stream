@@ -93,7 +93,8 @@ class WriteIteratorTest extends AbstractIteratorTest
             [1.4],
             [15],
             [[]],
-            [new class {}],
+            [new class {
+            }],
             [stream_context_create()]
         ];
     }

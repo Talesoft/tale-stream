@@ -540,7 +540,8 @@ class StreamTest extends TestCase
             [1.4],
             [15],
             [[]],
-            [new class {}],
+            [new class {
+            }],
             [stream_context_create()]
         ];
     }
@@ -553,7 +554,8 @@ class StreamTest extends TestCase
             [1.4],
             ['test'],
             [[]],
-            [new class {}],
+            [new class {
+            }],
             [stream_context_create()]
         ];
     }
@@ -565,7 +567,8 @@ class StreamTest extends TestCase
             [1.5],
             [1.4],
             [[]],
-            [new class {}],
+            [new class {
+            }],
             [stream_context_create()]
         ];
     }
