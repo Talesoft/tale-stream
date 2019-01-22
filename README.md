@@ -28,12 +28,12 @@ composer require talesoft/tale-stream
 Usage
 -----
 
+`use Tale\Stream;`
+
 The heart is the `Tale\Stream` class. You can pass any resource
 of type `stream` and have a PSR-7 compatible stream for any purpose.
 
 ```php
-use Tale\Stream;
-
 $stream = new Stream(fopen('/some/file', 'rb+'));
 
 if ($stream->isReadable()) {
