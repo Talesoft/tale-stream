@@ -10,7 +10,7 @@ Tale Stream
 What is Tale Stream?
 --------------------
 
-This is a direct implementation of the PSR-7 `Psr\HttpMessage\StreamInterface` and 
+This is a direct implementation of the PSR-7 `Psr\Http\Message\StreamInterface` and 
 the PSR-17 `Psr\Http\Message\StreamFactoryInterface`. It doesn't add any
 extra methods, only a few utility stream classes and some useful
 iterators for streams.
