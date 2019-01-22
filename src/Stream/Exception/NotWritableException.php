@@ -1,8 +1,12 @@
-<?php
-declare(strict_types=1);
+<?php declare(strict_types=1);
 
 namespace Tale\Stream\Exception;
 
-class NotWritableException extends InvalidOperationException
+/**
+ * An exception that occurs when an attempt to write to an unwritable stream was made.
+ *
+ * @package Tale\Stream\Exception
+ */
+final class NotWritableException extends InvalidOperationException
 {
 }

@@ -1,8 +1,12 @@
-<?php
-declare(strict_types=1);
+<?php declare(strict_types=1);
 
 namespace Tale\Stream\Exception;
 
-class NotReadableException extends InvalidOperationException
+/**
+ * An exception that occurs when an attempt to read an unreadable stream was made.
+ *
+ * @package Tale\Stream\Exception
+ */
+final class NotReadableException extends InvalidOperationException
 {
 }

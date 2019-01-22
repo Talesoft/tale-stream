@@ -1,31 +1,49 @@
-<?php
-declare(strict_types=1);
+<?php declare(strict_types=1);
 
 namespace Tale\Stream\Iterator;
 
 use Psr\Http\Message\StreamInterface;
-use Tale\Stream\Exception\NotReadableException;
+use Tale\Stream\Exception\NotWritableException;
 
-class WriteIterator implements \IteratorAggregate
+/**
+ * An iterator implementation that will write an inner iterator to a passed stream upon iteration.
+ *
+ * @package Tale\Stream\Iterator
+ */
+final class WriteIterator implements \IteratorAggregate
 {
+    /**
+     * The stream instance we write to.
+     *
+     * @var StreamInterface
+     */
     private $stream;
-    private $sourceIterator;
 
     /**
-     * ReadIterator constructor.
-     * @param iterable $sourceIterator
-     * @param StreamInterface $stream
+     * The iterable to read from.
+     *
+     * @var iterable
      */
-    public function __construct(StreamInterface $stream, iterable $sourceIterator)
+    private $sourceIterable;
+
+    /**
+     * Creates a new write iterator instance.
+     *
+     * @param StreamInterface $stream A writable stream instance to write to.
+     * @param iterable $sourceIterable An iterable to read from.
+     */
+    public function __construct(StreamInterface $stream, iterable $sourceIterable)
     {
         if (!$stream->isWritable()) {
-            throw new NotReadableException('Stream is not writable');
+            throw new NotWritableException('Stream is not writable');
         }
         $this->stream = $stream;
-        $this->sourceIterator = $sourceIterator;
+        $this->sourceIterable = $sourceIterable;
     }
 
     /**
+     * Returns the stream instance we write to.
+     *
      * @return StreamInterface
      */
     public function getStream(): StreamInterface
@@ -34,22 +52,38 @@ class WriteIterator implements \IteratorAggregate
     }
 
     /**
+     * Returns to iterable that is read from.
+     *
      * @return iterable
      */
-    public function getSourceIterator(): iterable
+    public function getSourceIterable(): iterable
     {
-        return $this->sourceIterator;
+        return $this->sourceIterable;
     }
 
-    public function rewind(): void
-    {
-        $this->stream->rewind();
-    }
-
+    /**
+     * Generates integer values for the amount of written bytes in each iteration.
+     *
+     * @return \Generator
+     */
     public function getIterator(): \Generator
     {
-        foreach ($this->sourceIterator as $content) {
-            yield $this->stream->write($content);
+        foreach ($this->sourceIterable as $content) {
+            try {
+                yield $this->stream->write($content);
+            } catch (\InvalidArgumentException $ex) {
+                throw new \RuntimeException('The iterable generated values that are not writable', 0, $ex);
+            }
         }
+    }
+
+    /**
+     * Completely finished the iteration and returns the total amount of bytes written.
+     *
+     * @return int
+     */
+    public function writeAll(): int
+    {
+        return array_sum(iterator_to_array($this->getIterator()));
     }
 }

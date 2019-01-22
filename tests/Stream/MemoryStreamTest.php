@@ -1,5 +1,4 @@
-<?php
-declare(strict_types=1);
+<?php declare(strict_types=1);
 
 namespace Tale\Test\Stream;
 
@@ -19,14 +18,28 @@ class MemoryStreamTest extends TestCase
     public function testConstruct(): void
     {
         $stream = new MemoryStream();
-        $this->assertEquals(0, $stream->getSize());
-        $this->assertEquals(0, $stream->tell());
-        $this->assertEquals('', $stream->getContents());
+        self::assertSame(0, $stream->getSize());
+        self::assertSame(0, $stream->tell());
+        self::assertSame('', $stream->getContents());
 
         $stream = new MemoryStream('test');
-        $this->assertEquals(4, $stream->getSize());
-        $this->assertEquals(0, $stream->tell());
-        $this->assertEquals('test', $stream->getContents());
+        self::assertSame(4, $stream->getSize());
+        self::assertSame(0, $stream->tell());
+        self::assertSame('test', $stream->getContents());
         $stream = null;
+    }
+
+    /**
+     * @covers ::eof
+     */
+    public function testEof(): void
+    {
+        $stream = new MemoryStream();
+        self::assertFalse($stream->eof());
+        self::assertSame('', $stream->read(1));
+        self::assertTrue($stream->eof());
+
+        $stream = new MemoryStream('test');
+        self::assertFalse($stream->eof());
     }
 }

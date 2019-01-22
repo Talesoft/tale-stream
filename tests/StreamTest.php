@@ -1,9 +1,8 @@
-<?php
-declare(strict_types=1);
+<?php declare(strict_types=1);
 
 namespace Tale\Test\Stream;
 
-use PHPUnit\Framework\Error\Error;
+use InvalidArgumentException;
 use PHPUnit\Framework\TestCase;
 use RuntimeException;
 use Tale\Stream;
@@ -28,34 +27,34 @@ class StreamTest extends TestCase
     {
         $fp = fopen(self::READ_RESOURCE, 'rb');
         $stream = new Stream($fp);
-        $this->assertInternalType('resource', $fp);
-        $this->assertEquals('stream', get_resource_type($fp));
-        $this->assertInternalType('array', $stream->getMetadata());
+        self::assertInternalType('resource', $fp);
+        self::assertEquals('stream', get_resource_type($fp));
+        self::assertInternalType('array', $stream->getMetadata());
         $stream = null;
-        $this->assertEquals('Unknown', get_resource_type($fp));
+        self::assertEquals('Unknown', get_resource_type($fp));
 
         $fp = fopen(self::READ_RESOURCE, 'rb');
         $stream = new Stream($fp);
-        $this->assertInternalType('resource', $fp);
-        $this->assertEquals('stream', get_resource_type($fp));
-        $this->assertInternalType('array', $stream->getMetadata());
+        self::assertInternalType('resource', $fp);
+        self::assertEquals('stream', get_resource_type($fp));
+        self::assertInternalType('array', $stream->getMetadata());
         $stream->close();
-        $this->assertEquals('Unknown', get_resource_type($fp));
-        $this->assertNull($stream->getMetadata());
+        self::assertEquals('Unknown', get_resource_type($fp));
+        self::assertNull($stream->getMetadata());
 
         $fp = fopen(self::READ_RESOURCE, 'rb');
         $stream = new Stream($fp);
-        $this->assertInternalType('resource', $fp);
-        $this->assertEquals('stream', get_resource_type($fp));
-        $this->assertInternalType('array', $stream->getMetadata());
+        self::assertInternalType('resource', $fp);
+        self::assertEquals('stream', get_resource_type($fp));
+        self::assertInternalType('array', $stream->getMetadata());
         $fp = $stream->detach();
-        $this->assertInternalType('resource', $fp);
-        $this->assertEquals('stream', get_resource_type($fp));
-        $this->assertNull($stream->getMetadata());
+        self::assertInternalType('resource', $fp);
+        self::assertEquals('stream', get_resource_type($fp));
+        self::assertNull($stream->getMetadata());
         $stream->close();
-        $this->assertEquals('stream', get_resource_type($fp));
+        self::assertEquals('stream', get_resource_type($fp));
         fclose($fp);
-        $this->assertEquals('Unknown', get_resource_type($fp));
+        self::assertEquals('Unknown', get_resource_type($fp));
     }
 
     /**
@@ -65,7 +64,7 @@ class StreamTest extends TestCase
      */
     public function testConstructThrowsExceptionWithBadParameters($parameter): void
     {
-        $this->expectException(\InvalidArgumentException::class);
+        $this->expectException(InvalidArgumentException::class);
         $stream = new Stream($parameter);
     }
 
@@ -92,15 +91,15 @@ class StreamTest extends TestCase
     public function testGetSize(): void
     {
         $stream = new Stream(fopen(self::READ_RESOURCE, 'rb'));
-        $this->assertEquals(30, $stream->getSize());
+        self::assertEquals(30, $stream->getSize());
 
         $stream = new Stream(fopen(self::READ_RESOURCE, 'rb'));
         $stream->detach();
-        $this->assertNull($stream->getSize());
+        self::assertNull($stream->getSize());
 
         $stream = new Stream(fopen(self::HTTP_RESOURCE, 'rb'));
-        $this->assertEquals(0, $stream->getSize()); //Can't get a size from HTTP Streams (the content is 30 chars long)
-        $this->assertEquals(30, \strlen($stream->getContents())); //But we can read it!
+        self::assertEquals(0, $stream->getSize()); //Can't get a size from HTTP Streams (the content is 30 chars long)
+        self::assertEquals(30, \strlen($stream->getContents())); //But we can read it!
     }
 
     /**
@@ -112,7 +111,7 @@ class StreamTest extends TestCase
     {
         $stream = new Stream(fopen(self::READ_RESOURCE, 'rb'));
         $stream->seek(5);
-        $this->assertEquals(5, $stream->tell());
+        self::assertEquals(5, $stream->tell());
     }
 
     /**
@@ -130,6 +129,23 @@ class StreamTest extends TestCase
 
     /**
      * @covers ::__construct
+     * @covers ::tell
+     * @expectedException \Tale\Stream\Exception\ResourceInvalidException
+     * @throws \ReflectionException
+     */
+    public function testTellThrowsExceptionOnInvalidResource(): void
+    {
+        $resource = fopen(self::READ_RESOURCE, 'rb');
+        $stream = new Stream($resource);
+        $prop = new \ReflectionProperty(Stream::class, 'resource');
+        $prop->setAccessible(true);
+        $prop->setValue($stream, stream_context_create());
+        $prop->setAccessible(false);
+        $stream->tell();
+    }
+
+    /**
+     * @covers ::__construct
      * @covers ::eof
      * @covers ::seek
      * @covers ::read
@@ -138,14 +154,20 @@ class StreamTest extends TestCase
     {
         $stream = new Stream(fopen(self::READ_RESOURCE, 'rb'));
         $stream->detach();
-        $this->assertTrue($stream->eof());
+        self::assertTrue($stream->eof());
 
         $stream = new Stream(fopen(self::READ_RESOURCE, 'rb'));
         while (!$stream->eof()) {
             $stream->read(7);
         }
-        $this->assertEquals(30, $stream->tell());
-        $this->assertTrue($stream->eof());
+        self::assertEquals(30, $stream->tell());
+        self::assertTrue($stream->eof());
+
+        $stream = new Stream(fopen(__DIR__.'/test-files/read-test-eof.txt', 'rb'));
+        self::assertFalse($stream->eof());
+        self::assertSame('', $stream->read(1));
+        self::assertTrue($stream->eof());
+        $stream = null;
     }
 
     /**
@@ -156,13 +178,13 @@ class StreamTest extends TestCase
     {
         $stream = new Stream(fopen(self::READ_RESOURCE, 'rb'));
         $stream->detach();
-        $this->assertFalse($stream->isSeekable());
+        self::assertFalse($stream->isSeekable());
 
         $stream = new Stream(fopen(self::READ_RESOURCE, 'rb'));
-        $this->assertTrue($stream->isSeekable()); //File streams are usually seekable
+        self::assertTrue($stream->isSeekable()); //File streams are usually seekable
 
         $stream = new Stream(fopen(self::HTTP_RESOURCE, 'rb'));
-        $this->assertFalse($stream->isSeekable()); //HTTP streams are not seekable
+        self::assertFalse($stream->isSeekable()); //HTTP streams are not seekable
     }
 
     /**
@@ -176,22 +198,48 @@ class StreamTest extends TestCase
         $stream = new Stream(fopen(self::READ_RESOURCE, 'rb'));
         $stream->seek(2, Stream::SEEK_START);
         $stream->seek(8, Stream::SEEK_START);
-        $this->assertEquals(8, $stream->tell());
+        self::assertEquals(8, $stream->tell());
 
         $stream = new Stream(fopen(self::READ_RESOURCE, 'rb'));
         $stream->seek(2, Stream::SEEK_START);
         $stream->seek(8, Stream::SEEK_START);
-        $this->assertEquals(8, $stream->tell());
+        self::assertEquals(8, $stream->tell());
 
         $stream = new Stream(fopen(self::READ_RESOURCE, 'rb'));
         $stream->seek(-3, Stream::SEEK_END);
         $stream->seek(-8, Stream::SEEK_END);
-        $this->assertEquals(22, $stream->tell());
+        self::assertEquals(22, $stream->tell());
 
         $stream = new Stream(fopen(self::READ_RESOURCE, 'rb'));
         $stream->seek(8, Stream::SEEK_CURRENT);
         $stream->seek(4, Stream::SEEK_CURRENT);
-        $this->assertEquals(12, $stream->tell());
+        self::assertEquals(12, $stream->tell());
+    }
+
+    /**
+     * @covers ::__construct
+     * @covers ::seek
+     * @dataProvider provideNonIntArguments
+     * @expectedException InvalidArgumentException
+     * @param $arg
+     */
+    public function testSeekThrowsExceptionOnInvalidOffset($arg): void
+    {
+        $stream = new Stream(fopen(self::READ_RESOURCE, 'rb'));
+        $stream->seek($arg);
+    }
+
+    /**
+     * @covers ::__construct
+     * @covers ::seek
+     * @dataProvider provideNonIntArguments
+     * @expectedException InvalidArgumentException
+     * @param $arg
+     */
+    public function testSeekThrowsExceptionOnInvalidWhence($arg): void
+    {
+        $stream = new Stream(fopen(self::READ_RESOURCE, 'rb'));
+        $stream->seek(0, $arg);
     }
 
     /**
@@ -210,11 +258,10 @@ class StreamTest extends TestCase
     /**
      * @covers ::__construct
      * @covers ::seek
+     * @expectedException \Tale\Stream\Exception\NotSeekableException
      */
     public function testSeekThrowsExceptionWhenNotSeekable(): void
     {
-        $this->expectException(Stream\Exception\NotSeekableException::class);
-
         $stream = new Stream(fopen(self::HTTP_RESOURCE, 'rb'));
         $stream->seek(5);
     }
@@ -227,18 +274,18 @@ class StreamTest extends TestCase
     {
         $stream = new Stream(fopen(self::READ_RESOURCE, 'rb'));
         $stream->seek(8);
-        $this->assertEquals(8, $stream->tell());
+        self::assertEquals(8, $stream->tell());
         $stream->rewind();
-        $this->assertEquals(0, $stream->tell());
+        self::assertEquals(0, $stream->tell());
     }
 
     /**
      * @covers ::__construct
      * @covers ::rewind
+     * @expectedException \Tale\Stream\Exception\NotSeekableException
      */
     public function testRewindThrowsExceptionWhenNotSeekable(): void
     {
-        $this->expectException(Stream\Exception\NotSeekableException::class);
         $stream = new Stream(fopen(self::HTTP_RESOURCE, 'rb'));
         $stream->rewind();
     }
@@ -251,13 +298,13 @@ class StreamTest extends TestCase
     {
         $stream = new Stream(fopen(self::READ_RESOURCE, 'ab'));
         $stream->detach();
-        $this->assertFalse($stream->isWritable());
+        self::assertFalse($stream->isWritable());
 
         $stream = new Stream(fopen(self::READ_RESOURCE, 'ab'));
-        $this->assertTrue($stream->isWritable());
+        self::assertTrue($stream->isWritable());
 
         $stream = new Stream(fopen(self::READ_RESOURCE, 'rb'));
-        $this->assertFalse($stream->isWritable());
+        self::assertFalse($stream->isWritable());
     }
 
     /**
@@ -269,12 +316,12 @@ class StreamTest extends TestCase
         $stream = new Stream(fopen(self::WRITE_RESOURCE, 'wb'));
         $stream->write('Test String');
         $stream = null;
-        $this->assertEquals('Test String', file_get_contents(self::WRITE_RESOURCE));
+        self::assertEquals('Test String', file_get_contents(self::WRITE_RESOURCE));
 
         $stream = new Stream(fopen(self::WRITE_RESOURCE, 'ab'));
         $stream->write(' with appended Text');
         $stream = null;
-        $this->assertEquals('Test String with appended Text', file_get_contents(self::WRITE_RESOURCE));
+        self::assertEquals('Test String with appended Text', file_get_contents(self::WRITE_RESOURCE));
 
         unlink(self::WRITE_RESOURCE);
     }
@@ -282,11 +329,22 @@ class StreamTest extends TestCase
     /**
      * @covers ::__construct
      * @covers ::write
+     * @dataProvider provideNonStringArguments
+     * @expectedException InvalidArgumentException
+     */
+    public function testWriteThrowsExceptionOnInvalidContent($arg): void
+    {
+        $stream = new Stream(fopen(self::READ_RESOURCE, 'rb'));
+        $stream->write($arg);
+    }
+
+    /**
+     * @covers ::__construct
+     * @covers ::write
+     * @expectedException \Tale\Stream\Exception\NotWritableException
      */
     public function testWriteThrowsExceptionWhenNotWritable(): void
     {
-        $this->expectException(Stream\Exception\NotWritableException::class);
-
         $stream = new Stream(fopen(self::READ_RESOURCE, 'rb'));
         $stream->write('Test String');
     }
@@ -312,16 +370,16 @@ class StreamTest extends TestCase
     {
         $stream = new Stream(fopen(self::READ_RESOURCE, 'rb'));
         $stream->detach();
-        $this->assertFalse($stream->isReadable());
+        self::assertFalse($stream->isReadable());
 
         $stream = new Stream(fopen(self::READ_RESOURCE, 'rb'));
-        $this->assertTrue($stream->isReadable());
+        self::assertTrue($stream->isReadable());
 
         $stream = new Stream(fopen(self::READ_RESOURCE, 'ab'));
-        $this->assertFalse($stream->isReadable());
+        self::assertFalse($stream->isReadable());
 
         $stream = new Stream(fopen(self::WRITE_RESOURCE, 'wb'));
-        $this->assertFalse($stream->isReadable());
+        self::assertFalse($stream->isReadable());
         $stream = null;
         unlink(self::WRITE_RESOURCE);
     }
@@ -334,12 +392,25 @@ class StreamTest extends TestCase
     public function testRead(): void
     {
         $stream = new Stream(fopen(self::READ_RESOURCE, 'rb'));
-        $this->assertEquals('This is', $stream->read(7));
-        $this->assertEquals("\n", $stream->read(1));
-        $this->assertEquals("some\n", $stream->read(5));
+        self::assertEquals('This is', $stream->read(7));
+        self::assertEquals("\n", $stream->read(1));
+        self::assertEquals("some\n", $stream->read(5));
         $stream->seek(-5, Stream::SEEK_CURRENT);
-        $this->assertEquals("some\n", $stream->read(5));
+        self::assertEquals("some\n", $stream->read(5));
         $stream = null;
+    }
+
+    /**
+     * @covers ::__construct
+     * @covers ::read
+     * @dataProvider provideNonIntArguments
+     * @expectedException InvalidArgumentException
+     * @param $arg
+     */
+    public function testReadThrowsExceptionOnInvalidLength($arg): void
+    {
+        $stream = new Stream(fopen(self::READ_RESOURCE, 'rb'));
+        $stream->read($arg);
     }
 
     /**
@@ -358,11 +429,10 @@ class StreamTest extends TestCase
     /**
      * @covers ::__construct
      * @covers ::read
+     * @expectedException \Tale\Stream\Exception\NotReadableException
      */
     public function testReadThrowsExceptionWhenNotReadable(): void
     {
-        $this->expectException(Stream\Exception\NotReadableException::class);
-
         $stream = new Stream(fopen(self::READ_RESOURCE, 'ab'));
         $stream->read(4);
     }
@@ -375,22 +445,21 @@ class StreamTest extends TestCase
     public function testGetContents(): void
     {
         $stream = new Stream(fopen(self::READ_RESOURCE, 'rb'));
-        $this->assertEquals("This is\nsome\nnice\ntest\nContent", $stream->getContents());
+        self::assertEquals("This is\nsome\nnice\ntest\nContent", $stream->getContents());
 
         $stream = new Stream(fopen(self::READ_RESOURCE, 'rb'));
         $stream->seek(5);
-        $this->assertEquals("is\nsome\nnice\ntest\nContent", $stream->getContents());
+        self::assertEquals("is\nsome\nnice\ntest\nContent", $stream->getContents());
         $stream = null;
     }
 
     /**
      * @covers ::__construct
      * @covers ::getContents
+     * @expectedException RuntimeException
      */
     public function testGetContentsThrowsExceptionWhenNotReadable(): void
     {
-        $this->expectException(RuntimeException::class);
-
         $stream = new Stream(fopen(self::READ_RESOURCE, 'ab'));
         $stream->getContents();
     }
@@ -415,9 +484,21 @@ class StreamTest extends TestCase
     public function testGetMetadata(): void
     {
         $stream = new Stream(fopen(self::READ_RESOURCE, 'rb'));
-        $this->assertInternalType('array', $stream->getMetadata());
-        $this->assertNull($stream->getMetadata('some thought up key'));
-        $this->assertEquals('rb', $stream->getMetadata('mode'));
+        self::assertInternalType('array', $stream->getMetadata());
+        self::assertNull($stream->getMetadata('some thought up key'));
+        self::assertEquals('rb', $stream->getMetadata('mode'));
+    }
+
+    /**
+     * @covers ::__construct
+     * @covers ::getMetadata
+     * @dataProvider provideInvalidMetadataKeys
+     * @expectedException \InvalidArgumentException
+     */
+    public function testGetMetadatThrowsExceptionOnInvalidKey($arg): void
+    {
+        $stream = new Stream(fopen(self::READ_RESOURCE, 'rb'));
+        self::assertEquals('rb', $stream->getMetadata($arg));
     }
 
     /**
@@ -427,27 +508,65 @@ class StreamTest extends TestCase
     public function testToString(): void
     {
         $stream = new Stream(fopen(self::READ_RESOURCE, 'rb'));
-        $this->assertEquals("This is\nsome\nnice\ntest\nContent", (string)$stream);
+        self::assertEquals("This is\nsome\nnice\ntest\nContent", (string)$stream);
         $stream->seek(6);
-        $this->assertEquals("This is\nsome\nnice\ntest\nContent", (string)$stream);
+        self::assertEquals("This is\nsome\nnice\ntest\nContent", (string)$stream);
 
         $stream = new Stream(fopen(self::READ_RESOURCE, 'ab'));
-        $this->assertEquals('', (string)$stream);
+        self::assertEquals('', (string)$stream);
 
         $stream = new Stream(fopen(self::READ_RESOURCE, 'rb'));
         $stream->seek(5);
-        $this->assertEquals("is\nsome\nnice\ntest\nContent", $stream->getContents());
+        self::assertEquals("is\nsome\nnice\ntest\nContent", $stream->getContents());
         $stream = null;
     }
 
     /**
      * @covers ::__construct
      * @covers ::__clone
+     * @expectedException RuntimeException
      */
     public function testCloneThrowsException(): void
     {
-        $this->expectException(RuntimeException::class);
         $stream = new Stream(fopen(self::READ_RESOURCE, 'rb'));
         $clone = clone $stream;
+    }
+
+    public function provideNonStringArguments(): array
+    {
+        return [
+            [null],
+            [true],
+            [1.4],
+            [15],
+            [[]],
+            [new class {}],
+            [stream_context_create()]
+        ];
+    }
+
+    public function provideNonIntArguments(): array
+    {
+        return [
+            [null],
+            [true],
+            [1.4],
+            ['test'],
+            [[]],
+            [new class {}],
+            [stream_context_create()]
+        ];
+    }
+
+    public function provideInvalidMetadataKeys(): array
+    {
+        return [
+            [true],
+            [1.5],
+            [1.4],
+            [[]],
+            [new class {}],
+            [stream_context_create()]
+        ];
     }
 }

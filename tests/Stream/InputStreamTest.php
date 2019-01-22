@@ -1,5 +1,4 @@
-<?php
-declare(strict_types=1);
+<?php declare(strict_types=1);
 
 namespace Tale\Test\Stream;
 
@@ -19,8 +18,8 @@ class InputStreamTest extends TestCase
     public function testConstruct(): void
     {
         $stream = new InputStream();
-        $this->assertTrue($stream->isReadable());
-        $this->assertFalse($stream->isWritable());
+        self::assertTrue($stream->isReadable());
+        self::assertFalse($stream->isWritable());
         $stream = null;
     }
 }

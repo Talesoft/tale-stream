@@ -1,30 +1,61 @@
-<?php
-declare(strict_types=1);
+<?php declare(strict_types=1);
 
 namespace Tale\Stream\Iterator;
 
-use Psr\Http\Message\StreamInterface;
-
-class SplitIterator extends ReadIterator
+/**
+ * An iterator that takes any iterable and splits its full content by a delimiter.
+ *
+ * A ReadIterator yielding
+ *
+ *     ["line 1\nline", " 2\nline 3"]
+ *
+ * will end up in this iterator yielding
+ *
+ *     ["line 1", "line 2", "line 3"]
+ *
+ * @package Tale\Stream\Iterator
+ */
+final class SplitIterator implements \IteratorAggregate
 {
     /**
+     * The ReadIterator that we're splitting up.
+     *
+     * @var ReadIterator
+     */
+    private $readIterator;
+
+    /**
+     * The delimiter we split up by.
+     *
      * @var string
      */
     private $delimiter;
 
     /**
-     * ReadIterator constructor.
-     * @param StreamInterface $stream
-     * @param string $delimiter
-     * @param int $chunkSize
+     * Creates a new split iterator instance.
+     *
+     * @param ReadIterator $readIterator The ReadIterator to split up.
+     * @param string $delimiter The delimiter to split up by.
      */
-    public function __construct(StreamInterface $stream, string $delimiter, int $chunkSize = 2048)
+    public function __construct(ReadIterator $readIterator, string $delimiter)
     {
-        parent::__construct($stream, $chunkSize);
+        $this->readIterator = $readIterator;
         $this->delimiter = $delimiter;
     }
 
     /**
+     * Returns the ReadIterator we're splitting up.
+     *
+     * @return ReadIterator
+     */
+    public function getReadIterator(): ReadIterator
+    {
+        return $this->readIterator;
+    }
+
+    /**
+     * Returns the delimiter we're splitting up by.
+     *
      * @return string
      */
     public function getDelimiter(): string
@@ -33,22 +64,14 @@ class SplitIterator extends ReadIterator
     }
 
     /**
-     * @param string $delimiter
-     * @return $this
-     */
-    public function setDelimiter(string $delimiter): self
-    {
-        $this->delimiter = $delimiter;
-        return $this;
-    }
-
-    /**
+     * Generates parts of an iterator split by the specified delimiter.
+     *
      * @return \Generator|string[]
      */
     public function getIterator(): \Generator
     {
         $line = '';
-        foreach (parent::getIterator() as $content) {
+        foreach ($this->readIterator as $content) {
             $parts = explode($this->delimiter, $content);
             $partCount = \count($parts);
             if ($partCount > 1) {
@@ -62,12 +85,10 @@ class SplitIterator extends ReadIterator
                         $line = $part;
                         continue;
                     }
-
                     yield $part;
                 }
                 continue;
             }
-
             $line .= $content;
         }
         yield $line;

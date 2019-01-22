@@ -1,20 +1,36 @@
-<?php
-declare(strict_types=1);
+<?php declare(strict_types=1);
 
 namespace Tale\Stream\Iterator;
 
 use Psr\Http\Message\StreamInterface;
 use Tale\Stream\Exception\NotReadableException;
 
-class ReadIterator implements \IteratorAggregate
+/**
+ * An iterator that will read a stream sequentially based on a chunk size.
+ *
+ * @package Tale\Stream\Iterator
+ */
+final class ReadIterator implements \IteratorAggregate
 {
+    /**
+     * The stream that is read from.
+     *
+     * @var StreamInterface
+     */
     private $stream;
+
+    /**
+     * The chunk size to read for every iteration.
+     *
+     * @var int
+     */
     private $chunkSize;
 
     /**
-     * ReadIterator constructor.
-     * @param StreamInterface $stream
-     * @param int $chunkSize
+     * Creates a new read iterator.
+     *
+     * @param StreamInterface $stream The stream instance to read from.
+     * @param int $chunkSize The chunk size to use for each iteration (Default: 1024)
      */
     public function __construct(StreamInterface $stream, int $chunkSize = 1024)
     {
@@ -26,6 +42,8 @@ class ReadIterator implements \IteratorAggregate
     }
 
     /**
+     * Returns the stream instance we read from.
+     *
      * @return StreamInterface
      */
     public function getStream(): StreamInterface
@@ -34,6 +52,8 @@ class ReadIterator implements \IteratorAggregate
     }
 
     /**
+     * Returns the chunk size used in each iteration.
+     *
      * @return int
      */
     public function getChunkSize(): int
@@ -42,32 +62,30 @@ class ReadIterator implements \IteratorAggregate
     }
 
     /**
-     * @param int $chunkSize
-     * @return $this
+     * Checks if the stream we read from is at its end.
+     *
+     * @return bool
      */
-    public function setChunkSize(int $chunkSize): self
-    {
-        $this->chunkSize = $chunkSize;
-        return $this;
-    }
-
     public function eof(): bool
     {
         return $this->stream->eof();
     }
 
-    public function rewind(): void
-    {
-        $this->stream->rewind();
-    }
-
+    /**
+     * Generates chunks based on the passed chunk size through reading from the stream.
+     *
+     * @return \Generator
+     */
     public function getIterator(): \Generator
     {
         while (!$this->stream->eof()) {
             $item = $this->stream->read($this->chunkSize);
+            // @codeCoverageIgnoreStart
+            //I don't know how to fabricate this manually, so I can't test it.
             if ($item === '') {
                 continue;
             }
+            // @codeCoverageIgnoreEnd
             yield $item;
         }
     }

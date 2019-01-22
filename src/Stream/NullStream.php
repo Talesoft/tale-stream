@@ -1,5 +1,4 @@
-<?php
-declare(strict_types=1);
+<?php declare(strict_types=1);
 
 namespace Tale\Stream;
 
@@ -7,11 +6,14 @@ use Psr\Http\Message\StreamInterface;
 use RuntimeException;
 
 /**
- * Class Stream
+ * A stream that does absolutely nothing.
  *
- * @package Tale
+ * It can act as a default stream to avoid defensive null checks
+ * and to ease up testing.
+ *
+ * @package Tale\Stream
  */
-class NullStream implements StreamInterface
+final class NullStream implements StreamInterface
 {
     /**
      * {@inheritdoc}

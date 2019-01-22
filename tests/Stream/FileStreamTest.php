@@ -1,5 +1,4 @@
-<?php
-declare(strict_types=1);
+<?php declare(strict_types=1);
 
 namespace Tale\Test\Stream;
 
@@ -20,11 +19,11 @@ class FileStreamTest extends TestCase
     {
         $stream = new FileStream('php://memory', 'rb+');
         $stream->write('test');
-        $this->assertEquals(4, $stream->getSize());
+        self::assertSame(4, $stream->getSize());
 
         $stream = new FileStream('php://memory', 'rb+', false, stream_context_create());
         $stream->write('test');
-        $this->assertEquals(4, $stream->getSize());
+        self::assertSame(4, $stream->getSize());
         $stream = null;
     }
     /**

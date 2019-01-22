@@ -1,12 +1,10 @@
-<?php
-declare(strict_types=1);
+<?php declare(strict_types=1);
 
 namespace Tale\Test\Stream;
 
 use PHPUnit\Framework\TestCase;
 use Tale\Stream;
 use Tale\Stream\NullStream;
-use Tale\Stream\StandardErrorStream;
 
 /**
  * @coversDefaultClass \Tale\Stream\NullStream
@@ -33,22 +31,22 @@ class NullStreamTest extends TestCase
     public function testMethodReturnValues(): void
     {
         $stream = new NullStream();
-        $this->assertEquals(0, $stream->tell());
-        $this->assertEquals(0, $stream->getSize());
-        $this->assertEquals('', $stream->getContents());
+        self::assertSame(0, $stream->tell());
+        self::assertSame(0, $stream->getSize());
+        self::assertSame('', $stream->getContents());
         $stream->close(); //It does nothing.
-        $this->assertNull($stream->detach());
-        $this->assertTrue($stream->eof());
-        $this->assertNull($stream->getMetadata());
-        $this->assertNull($stream->getMetadata('test'));
-        $this->assertTrue($stream->isReadable());
-        $this->assertTrue($stream->isSeekable());
-        $this->assertTrue($stream->isWritable());
-        $this->assertEquals('', $stream->read(15));
+        self::assertNull($stream->detach());
+        self::assertTrue($stream->eof());
+        self::assertNull($stream->getMetadata());
+        self::assertNull($stream->getMetadata('test'));
+        self::assertTrue($stream->isReadable());
+        self::assertTrue($stream->isSeekable());
+        self::assertTrue($stream->isWritable());
+        self::assertSame('', $stream->read(15));
         $stream->rewind();
         $stream->seek(15, Stream::SEEK_CURRENT);
-        $this->assertEquals(4, $stream->write('test'));
-        $this->assertEquals('', (string)$stream);
+        self::assertSame(4, $stream->write('test'));
+        self::assertSame('', (string)$stream);
     }
 
     /**

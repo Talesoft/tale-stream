@@ -1,12 +1,18 @@
-<?php
-declare(strict_types=1);
+<?php declare(strict_types=1);
 
 namespace Tale\Stream;
 
-class StandardInputStream extends FileStream
+/**
+ * A stream that provides underlying STDIN stream of the PHP process.
+ *
+ * A wrapper around PHP's php://stdin stream handle.
+ *
+ * @package Tale\Stream
+ */
+final class StandardInputStream extends FileStream
 {
     /**
-     * StderrStream constructor.
+     * Creates a new standard input stream instance.
      */
     public function __construct()
     {
