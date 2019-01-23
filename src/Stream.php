@@ -17,7 +17,7 @@ use Tale\Stream\Exception\ResourceInvalidException;
  *
  * @package Tale
  */
-class Stream implements StreamInterface
+final class Stream implements StreamInterface
 {
     /**
      * Tells ->seek() to move from the start of the stream.
@@ -33,6 +33,14 @@ class Stream implements StreamInterface
      * Tells ->seek() to move from the end of the stream.
      */
     public const SEEK_END = \SEEK_END;
+
+    public const PHP_INPUT = 'php://input';
+    public const PHP_OUTPUT = 'php://output';
+    public const PHP_MEMORY = 'php://memory';
+    public const PHP_TEMP = 'php://temp';
+    public const PHP_STDIN = 'php://stdin';
+    public const PHP_STDERR = 'php://stderr';
+    public const PHP_STDOUT = 'php://stdout';
 
     /**
      * The current stream context resource.
@@ -81,7 +89,7 @@ class Stream implements StreamInterface
     /**
      * Closes the stream upon deconstruction of this object
      */
-    final public function __destruct()
+    public function __destruct()
     {
         $this->close();
     }
@@ -89,7 +97,7 @@ class Stream implements StreamInterface
     /**
      * {@inheritdoc}
      */
-    final public function close(): void
+    public function close(): void
     {
         if (!\is_resource($this->resource)) {
             return;
@@ -102,7 +110,7 @@ class Stream implements StreamInterface
     /**
      * {@inheritdoc}
      */
-    final public function detach()
+    public function detach()
     {
         $resource = $this->resource;
         $this->resource = null;
@@ -113,7 +121,7 @@ class Stream implements StreamInterface
     /**
      * {@inheritdoc}
      */
-    final public function getSize(): ?int
+    public function getSize(): ?int
     {
         if (!\is_resource($this->resource)) {
             return null;
@@ -126,7 +134,7 @@ class Stream implements StreamInterface
     /**
      * {@inheritdoc}
      */
-    final public function tell(): int
+    public function tell(): int
     {
         if (!\is_resource($this->resource)) {
             throw new ResourceClosedException('Failed to tell stream position: Resource is closed.');
@@ -141,7 +149,7 @@ class Stream implements StreamInterface
     /**
      * {@inheritdoc}
      */
-    final public function eof(): bool
+    public function eof(): bool
     {
         if (!\is_resource($this->resource)) {
             return true;
@@ -152,7 +160,7 @@ class Stream implements StreamInterface
     /**
      * {@inheritdoc}
      */
-    final public function isSeekable(): bool
+    public function isSeekable(): bool
     {
         if (!\is_resource($this->resource)) {
             return false;
@@ -164,7 +172,7 @@ class Stream implements StreamInterface
     /**
      * {@inheritdoc}
      */
-    final public function seek($offset, $whence = self::SEEK_START): void
+    public function seek($offset, $whence = self::SEEK_START): void
     {
         if (!\is_int($offset)) {
             throw new InvalidArgumentException(sprintf(
@@ -201,7 +209,7 @@ class Stream implements StreamInterface
     /**
      * {@inheritdoc}
      */
-    final public function rewind(): void
+    public function rewind(): void
     {
         $this->seek(0);
     }
@@ -209,7 +217,7 @@ class Stream implements StreamInterface
     /**
      * {@inheritdoc}
      */
-    final public function isWritable(): bool
+    public function isWritable(): bool
     {
         if (!\is_resource($this->resource)) {
             return false;
@@ -224,7 +232,7 @@ class Stream implements StreamInterface
     /**
      * {@inheritdoc}
      */
-    final public function write($string): int
+    public function write($string): int
     {
         if (!\is_string($string)) {
             throw new InvalidArgumentException(sprintf(
@@ -254,7 +262,7 @@ class Stream implements StreamInterface
     /**
      * {@inheritdoc}
      */
-    final public function isReadable(): bool
+    public function isReadable(): bool
     {
         if (!\is_resource($this->resource)) {
             return false;
@@ -267,7 +275,7 @@ class Stream implements StreamInterface
     /**
      * {@inheritdoc}
      */
-    final public function read($length): string
+    public function read($length): string
     {
         if (!\is_int($length)) {
             throw new InvalidArgumentException(sprintf(
@@ -297,7 +305,7 @@ class Stream implements StreamInterface
     /**
      * {@inheritdoc}
      */
-    final public function getContents(): string
+    public function getContents(): string
     {
         if (!\is_resource($this->resource)) {
             throw new ResourceClosedException('Failed to get contents: Resource is closed.');
@@ -313,7 +321,7 @@ class Stream implements StreamInterface
     /**
      * {@inheritdoc}
      */
-    final public function getMetadata($key = null)
+    public function getMetadata($key = null)
     {
         if (!\is_string($key) && $key !== null) {
             throw new InvalidArgumentException(sprintf(
@@ -337,7 +345,7 @@ class Stream implements StreamInterface
     /**
      * {@inheritdoc}
      */
-    final public function __toString(): string
+    public function __toString(): string
     {
         try {
             if ($this->isReadable() && $this->isSeekable()) {
@@ -354,10 +362,72 @@ class Stream implements StreamInterface
      *
      * @throws \RuntimeException
      */
-    final public function __clone()
+    public function __clone()
     {
         $this->resource = null;
         $this->metadata = null;
         throw new \RuntimeException('Streams cannot be cloned');
+    }
+
+    public static function createFileStream(
+        string $filename,
+        string $mode = 'rb',
+        bool $useIncludePath = false,
+        $context = null
+    ): self {
+    
+        return new self($context === null
+            ? fopen($filename, $mode, $useIncludePath)
+            : fopen($filename, $mode, $useIncludePath, $context)
+        );
+    }
+
+    public static function createInputStream(): self
+    {
+        return self::createFileStream(self::PHP_INPUT);
+    }
+
+    public static function createOutputStream(): self
+    {
+        return self::createFileStream(self::PHP_OUTPUT, 'wb');
+    }
+
+    public static function createMemoryStream(string $content = ''): self
+    {
+        $stream = self::createFileStream(self::PHP_MEMORY, 'rb+');
+        if ($content) {
+            $stream->write($content);
+            $stream->rewind();
+        }
+        return $stream;
+    }
+
+    public static function createTempStream(string $content = '', ?int $maxMemory = null): self
+    {
+        $handle = self::PHP_TEMP;
+        if ($maxMemory === null) {
+            $handle .= "/maxmemory:{$maxMemory}";
+        }
+        $stream = self::createFileStream($handle, 'rb+');
+        if ($content) {
+            $stream->write($content);
+            $stream->rewind();
+        }
+        return $stream;
+    }
+
+    public static function createStdinStream(): self
+    {
+        return self::createFileStream(self::PHP_STDIN);
+    }
+
+    public static function createStderrStream(): self
+    {
+        return self::createFileStream(self::PHP_STDERR, 'wb');
+    }
+
+    public static function createStdoutStream(): self
+    {
+        return self::createFileStream(self::PHP_STDOUT, 'wb');
     }
 }

@@ -4,11 +4,10 @@ namespace Tale\Test\Stream\Iterator;
 
 use CallbackFilterIterator;
 use IteratorIterator;
-use Tale\Stream\InputStream;
+use Tale\Stream;
 use Tale\Stream\Iterator\LineIterator;
 use Tale\Stream\Iterator\ReadIterator;
 use Tale\Stream\Iterator\WriteIterator;
-use Tale\Stream\MemoryStream;
 
 /**
  * @coversDefaultClass \Tale\Stream\Iterator\WriteIterator
@@ -24,9 +23,7 @@ class WriteIteratorTest extends AbstractIteratorTest
      */
     public function testConstruct(): void
     {
-
-        $outputStream = new MemoryStream();
-
+        $outputStream = Stream::createMemoryStream();
         $addLfModifier = $this->createSourceIterator();
         $writeIterator = new WriteIterator($outputStream, $addLfModifier);
         self::assertSame($outputStream, $writeIterator->getStream());
@@ -41,7 +38,7 @@ class WriteIteratorTest extends AbstractIteratorTest
 
     private function createSourceIterator()
     {
-        $inputStream = new MemoryStream("ab\ncd\nde\ng");
+        $inputStream = Stream::createMemoryStream("ab\ncd\nde\ng");
 
         //Use a LineIterator to cleanly read lines
         $reader = new LineIterator(new ReadIterator($inputStream));
@@ -68,7 +65,7 @@ class WriteIteratorTest extends AbstractIteratorTest
      */
     public function testIfConstructThrowsExceptionWhenStreamIsNotWritable(): void
     {
-        $writeIterator = new WriteIterator(new InputStream(), new \ArrayIterator());
+        $writeIterator = new WriteIterator(Stream::createInputStream(), new \ArrayIterator());
     }
 
     /**
@@ -81,7 +78,7 @@ class WriteIteratorTest extends AbstractIteratorTest
      */
     public function testIfGetIteratorThrowsExceptionOnNonWritableValue($arg): void
     {
-        $writeIterator = new WriteIterator(new MemoryStream(), [$arg]);
+        $writeIterator = new WriteIterator(Stream::createMemoryStream(), [$arg]);
         $writeIterator->writeAll();
     }
 

@@ -2,7 +2,7 @@
     "name": "talesoft/tale-stream",
     "type": "library",
     "keywords": ["stream", "stream-wrapper"],
-    "description": "A basic, PSR-7 compatible stream utility library",
+    "description": "A basic, PSR-7 and PSR-17 compatible stream utility library",
     "license": "MIT",
     "homepage": "http://docs.talesoft.codes/php/tale/stream",
     "authors": [
@@ -13,14 +13,19 @@
     ],
     "require": {
         "php": ">=7.1.0",
-        "psr/http-message": ">=1.0",
+        "psr/http-message": "^1.0",
         "psr/http-factory": "^1.0"
     },
     "autoload": {
         "psr-4": {
             "Tale\\": "src",
             "Tale\\Test\\": "tests"
-        }
+        },
+        "files": ["src/functions.php"]
+    },
+    "provides": {
+        "psr/http-message-implementation": "~1.0",
+        "psr/http-factory-implementation": "~1.0"
     },
     "require-dev": {
         "talesoft/tale-dev-tool": "0.2.2"

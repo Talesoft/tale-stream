@@ -2,9 +2,8 @@
 
 namespace Tale\Test\Stream\Iterator;
 
+use Tale\Stream;
 use Tale\Stream\Iterator\ReadIterator;
-use Tale\Stream\OutputStream;
-use Tale\Stream\TempStream;
 
 /**
  * @coversDefaultClass \Tale\Stream\Iterator\ReadIterator
@@ -20,7 +19,7 @@ class ReadIteratorTest extends AbstractIteratorTest
      */
     public function testConstruct(): void
     {
-        $stream = new TempStream('test');
+        $stream = Stream::createTempStream('test');
         $iterator = new ReadIterator($stream, 8);
         self::assertSame(8, $iterator->getChunkSize());
         self::assertSame($stream, $iterator->getStream());
@@ -35,6 +34,6 @@ class ReadIteratorTest extends AbstractIteratorTest
      */
     public function testIfConstructorThrowsExceptionOnNonReadableStream(): void
     {
-        $iterator = new ReadIterator(new OutputStream(), 8);
+        $iterator = new ReadIterator(Stream::createOutputStream(), 8);
     }
 }

@@ -2,9 +2,9 @@
 
 namespace Tale\Test\Stream\Iterator;
 
+use Tale\Stream;
 use Tale\Stream\Iterator\ReadIterator;
 use Tale\Stream\Iterator\SplitIterator;
-use Tale\Stream\TempStream;
 
 /**
  * @coversDefaultClass \Tale\Stream\Iterator\SplitIterator
@@ -20,7 +20,7 @@ class SplitIteratorTest extends AbstractIteratorTest
     public function testConstruct(): void
     {
         for ($i = 1; $i <= 10; $i++) {
-            $stream = new TempStream('a,b,c,d');
+            $stream = Stream::createTempStream('a,b,c,d');
             $readIterator = new ReadIterator($stream, $i);
             $iterator = new SplitIterator($readIterator, ',');
             self::assertSame(',', $iterator->getDelimiter());

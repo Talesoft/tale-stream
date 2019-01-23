@@ -17,12 +17,12 @@ trait FactoryTrait
 {
     final public function createStream(string $content = ''): StreamInterface
     {
-        return new TempStream($content);
+        return Stream::createMemoryStream($content);
     }
 
     final public function createStreamFromFile(string $filename, string $mode = 'rb'): StreamInterface
     {
-        return new FileStream($filename, $mode);
+        return Stream::createFileStream($filename, $mode);
     }
 
     final public function createStreamFromResource($resource): StreamInterface

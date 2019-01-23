@@ -6,6 +6,7 @@ use InvalidArgumentException;
 use PHPUnit\Framework\TestCase;
 use RuntimeException;
 use Tale\Stream;
+use function Tale\stream_create_file;
 
 /**
  * @coversDefaultClass \Tale\Stream
@@ -530,6 +531,131 @@ class StreamTest extends TestCase
     {
         $stream = new Stream(fopen(self::READ_RESOURCE, 'rb'));
         $clone = clone $stream;
+    }
+
+    /**
+     * @covers ::__construct
+     * @covers ::createFileStream
+     */
+    public function testCreateFileStream(): void
+    {
+        $stream = Stream::createFileStream('php://memory', 'rb+');
+        $stream->write('test');
+        self::assertSame(4, $stream->getSize());
+
+        $stream = Stream::createFileStream('php://memory', 'rb+', false, stream_context_create());
+        $stream->write('test');
+        self::assertSame(4, $stream->getSize());
+        $stream = null;
+    }
+
+    /**
+     * @covers ::__construct
+     * @covers ::createInputStream
+     */
+    public function testCreateInputStream(): void
+    {
+        $stream = Stream::createInputStream();
+        self::assertTrue($stream->isReadable());
+        self::assertFalse($stream->isWritable());
+        $stream = null;
+    }
+    /**
+     * @covers ::__construct
+     * @covers ::createMemoryStream
+     */
+    public function testCreateMemoryStream(): void
+    {
+        $stream = Stream::createMemoryStream();
+        self::assertSame(0, $stream->getSize());
+        self::assertSame(0, $stream->tell());
+        self::assertSame('', $stream->getContents());
+
+        $stream = Stream::createMemoryStream('test');
+        self::assertSame(4, $stream->getSize());
+        self::assertSame(0, $stream->tell());
+        self::assertSame('test', $stream->getContents());
+        $stream = null;
+    }
+
+    /**
+     * @covers ::createMemoryStream
+     * @covers ::eof
+     */
+    public function testMemoryStreamEof(): void
+    {
+        $stream = Stream::createMemoryStream();
+        self::assertFalse($stream->eof());
+        self::assertSame('', $stream->read(1));
+        self::assertTrue($stream->eof());
+
+        $stream = Stream::createMemoryStream('test');
+        self::assertFalse($stream->eof());
+    }
+
+
+    /**
+     * @covers ::__construct
+     * @covers ::createTempStream
+     */
+    public function testCreateTempStream(): void
+    {
+        $stream = Stream::createTempStream();
+        self::assertSame(0, $stream->getSize());
+        self::assertSame(0, $stream->tell());
+        self::assertSame('', $stream->getContents());
+
+        $stream = Stream::createTempStream('test', 3);
+        self::assertSame(4, $stream->getSize());
+        self::assertSame(0, $stream->tell());
+        self::assertSame('test', $stream->getContents());
+    }
+
+    /**
+     * @covers ::__construct
+     * @covers ::createOutputStream
+     */
+    public function testCreateOutputStream(): void
+    {
+        $stream = Stream::createOutputStream();
+        self::assertTrue($stream->isWritable());
+        self::assertFalse($stream->isReadable());
+        $stream = null;
+    }
+
+    /**
+     * @covers ::__construct
+     * @covers ::createStdinStream
+     */
+    public function testCreateStdinStream(): void
+    {
+        $stream = Stream::createStdinStream();
+        self::assertTrue($stream->isReadable());
+        self::assertFalse($stream->isWritable());
+        $stream = null;
+    }
+
+    /**
+     * @covers ::__construct
+     * @covers ::createStderrStream
+     */
+    public function testCreateStderrStream(): void
+    {
+        $stream = Stream::createStderrStream();
+        self::assertTrue($stream->isWritable());
+        self::assertFalse($stream->isReadable());
+        $stream = null;
+    }
+    /**
+     * @covers ::__construct
+     * @covers ::createStdoutStream
+     */
+    public function testCreateStdoutStream(): void
+    {
+        $stream = Stream::createStdoutStream();
+        self::assertTrue($stream->isWritable());
+        self::assertFalse($stream->isReadable());
+        $stream = null;
     }
 
     public function provideNonStringArguments(): array

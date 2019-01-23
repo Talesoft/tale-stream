@@ -12,7 +12,7 @@ What is Tale Stream?
 
 This is a direct implementation of the PSR-7 `Psr\Http\Message\StreamInterface` and 
 the PSR-17 `Psr\Http\Message\StreamFactoryInterface`. It doesn't add any
-extra methods, only a few utility stream classes and some useful
+extra methods, only a few utility stream factories and some useful
 iterators for streams.
 
 It acts as a stable streaming library core for full-fledged streaming libraries
@@ -47,75 +47,39 @@ if ($stream->isWritable()) {
 
 ### Utility Streams
 
-#### FileStream
-
-`use Tale\Stream\FileStream;`
+#### Stream::createFileStream
 
 The filestream works analogous to the `fopen($filename, $mode, $useIncludePath, $context)` function
 
 ```php
-$fs = new FileStream(__DIR__.'/some-file.txt', 'rb');
+$fs = Stream::createFileStream(__DIR__.'/some-file.txt', 'rb');
 while (!$fs->eof()) {
     echo $fs->read(32);
 }
 ```
 
-#### InputStream
-
-`use Tale\Stream\InputStream;`
+#### Stream::createInputStream
 
 The input stream is a readable FileStream on `php://input`
 
-#### MemoryStream
+#### Stream::createOutputStream
 
-`use Tale\Stream\MemoryStream;`
+The output stream is a writable FileStream on `php://output`
+
+#### Stream::createMemoryStream
 
 The memory stream is a readable and writable FileStream on `php://memory`. Very useful
 to provide string-based values to stream-based operations. You can feed it with initial
 data:
 
 ```php
-$ms = new MemoryStream('I am some content!');
+$ms = Stream::createMemoryStream('I am some content!');
 
 echo $ms->read(10); //"I am some "
 echo $ms->read(8); //"content!"
 ```
 
-#### NullStream
-
-`use Tale\Stream\NullStream;`
-
-The null-stream does nothing. It only implements the interfaces. Useful
-to avoid defensive null checks on optional dependencies, to suppress things
-and for testing.
-
-#### OutputStream
-
-`use Tale\Stream\OutputStream;`
-
-The output stream is a writable FileStream on `php://output`
-
-#### StandardErrorStream
-
-`use Tale\Stream\StandardErrorStream;`
-
-The standard error stream is a writable FileStream on `php://stderr`
-
-#### StandardInputStream
-
-`use Tale\Stream\StandardInputStream;`
-
-The standard input stream is a readable FileStream on `php://stdin`
-
-#### StandardOutputStream
-
-`use Tale\Stream\StandardOutputStream;`
-
-The standard output stream is a writable FileStream on `php://stdout`
-
-#### TempStream
-
-`use Tale\Stream\TempStream;`
+#### Stream::createTempStream
 
 The temp stream is a FileStream on `php://temp`. You can set a maximum
 memory limit (when the stream starts using a temporary file) and you can 
@@ -127,6 +91,27 @@ $ts = new TempStream('I am some content!', 1024);
 echo $ts->read(10); //"I am some "
 echo $ts->read(8); //"content!"
 ```
+
+#### Stream::createStdinStream
+
+The standard input stream is a readable FileStream on `php://stdin`
+
+#### Stream::createStderrStream
+
+The standard error stream is a writable FileStream on `php://stderr`
+
+#### Stream::createStdoutStream
+
+The standard output stream is a writable FileStream on `php://stdout`
+
+### NullStream
+
+`use Tale\Stream\NullStream`
+
+The null-stream does nothing. It only implements the interfaces. Useful
+to avoid defensive null checks on optional dependencies, to suppress things
+and for testing.
+
 
 ### Using the factory
 
@@ -209,7 +194,7 @@ ReadIterator will read a stream chunk-by-chunk (default chunk size is 1024)
 
 ```php
 //Have a stream of some kind
-$stream = new MemoryStream('abcdefg');
+$stream = Stream::createMemoryStream('abcdefg');
 
 //Create a ReadIterator on that stream
 $iterator = new ReadIterator($stream, 2); //2 is the chunk size (default: 1024)
@@ -231,7 +216,7 @@ SplitIterator will split the content by a delimiter and yield item-by-item.
 You can pass any iterator as the first argument.
 
 ```php
-$stream = new MemoryStream('ab|cd|ef|g');
+$stream = Stream::createMemoryStream('ab|cd|ef|g');
 
 $readIterator = new ReadIterator($stream);
 
@@ -251,7 +236,7 @@ Other than `fgets`, this line reader is not limited to its chunk-size. Lines
 can be as long as the PHP process allows and the chunk size does not matter.
 
 ```php
-$stream = new MemoryStream("ab\ncd\nde\ng");
+$stream = Stream::createMemoryStream("ab\ncd\nde\ng");
 
 $reader = new LineIterator($stream);
 
@@ -267,9 +252,9 @@ foreach ($reader as $item) {
 WriteIterator allows to pipe and filter streams easily and efficiently.
 
 ```php
-$inputStream = new MemoryStream('stream content');
+$inputStream = Stream::createMemoryStream('stream content');
 
-$outputStream = new MemoryStream();
+$outputStream = Stream::createMemoryStream();
 
 $chunkSize = 2048;
 
@@ -297,7 +282,7 @@ function generateContents(): Generator
     yield "Line 3\n";
 }
 
-$stream = new FileStream('./some-file.txt', 'wb');
+$stream = Stream::createFileStream('./some-file.txt', 'wb');
 
 $iterator = new WriteIterator($stream, generateContents());
 $iterator->writeAll();
@@ -318,7 +303,9 @@ use Tale\Stream\Iterator\ReadIterator;
 use Tale\Stream\Iterator\WriteIterator;
 use Tale\Stream\Iterator\LineIterator;
 
-$inputStream = new MemoryStream("ab\ncd\nde\ng");
+$inputStream = Stream::createMemoryStream("ab\ncd\nde\ng");
+
+$outputStream = Stream::createMemoryStream();
 
 //Use a LineIterator to cleanly read lines
 $reader = new LineIterator($inputStream);
@@ -330,8 +317,6 @@ $filteredReader = new CallbackFilterIterator($reader, function (string $line) {
 
 //Will add "\n" to all lines
 $lfSuffixer = new SuffixIterator($filteredReader, "\n");
-
-$outputStream = new MemoryStream();
 
 $writer = new WriteIterator($outputStream, $lfSuffixer);
 $writer->writeAll();
