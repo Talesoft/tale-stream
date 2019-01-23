@@ -5,6 +5,7 @@ namespace Tale;
 use Psr\Http\Message\StreamFactoryInterface;
 use Psr\Http\Message\StreamInterface;
 use Tale\Stream\Factory;
+use Tale\Stream\NullStream;
 
 function stream($resource): StreamInterface
 {
@@ -59,4 +60,9 @@ function stream_create_stderr(): StreamInterface
 function stream_create_stdout(): StreamInterface
 {
     return Stream::createStderrStream();
+}
+
+function stream_null(): StreamInterface
+{
+    return new NullStream();
 }
