@@ -22,7 +22,7 @@ Installation
 ------------
 
 ```bash
-composer require talesoft/tale-stream
+composer req talesoft/tale-stream
 ```
 
 Usage
