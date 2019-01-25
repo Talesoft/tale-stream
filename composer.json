@@ -28,6 +28,6 @@
         "psr/http-factory-implementation": "~1.0"
     },
     "require-dev": {
-        "talesoft/tale-dev-tool": "0.2.2"
+        "talesoft/tale-dev-tool": "dev-master"
     }
 }

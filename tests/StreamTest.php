@@ -6,7 +6,6 @@ use InvalidArgumentException;
 use PHPUnit\Framework\TestCase;
 use RuntimeException;
 use Tale\Stream;
-use function Tale\stream_create_file;
 
 /**
  * @coversDefaultClass \Tale\Stream

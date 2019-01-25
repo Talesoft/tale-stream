@@ -7,6 +7,6 @@ namespace Tale\Stream\Exception;
  *
  * @package Tale\Stream\Exception
  */
-final class NotWritableException extends InvalidOperationException
+final class NotWritableException extends \RuntimeException implements InvalidOperationExceptionInterface
 {
 }

@@ -7,6 +7,6 @@ namespace Tale\Stream\Exception;
  *
  * @package Tale\Stream\Exception
  */
-final class NotSeekableException extends InvalidOperationException
+final class NotSeekableException extends \RuntimeException implements InvalidOperationExceptionInterface
 {
 }
