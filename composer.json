@@ -1,8 +1,8 @@
 {
     "name": "talesoft/tale-stream",
     "type": "library",
-    "keywords": ["stream", "stream-wrapper"],
-    "description": "A basic, PSR-7 and PSR-17 compatible stream utility library",
+    "keywords": ["stream", "stream-wrapper", "psr-7", "psr-17", "memory-stream", "temp-stream"],
+    "description": "A basic PSR-7 and PSR-17 compatible stream utility library",
     "license": "MIT",
     "homepage": "http://docs.talesoft.codes/php/tale/stream",
     "authors": [

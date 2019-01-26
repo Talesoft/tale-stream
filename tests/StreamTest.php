@@ -27,28 +27,28 @@ class StreamTest extends TestCase
     {
         $fp = fopen(self::READ_RESOURCE, 'rb');
         $stream = new Stream($fp);
-        self::assertInternalType('resource', $fp);
+        self::assertIsResource($fp);
         self::assertEquals('stream', get_resource_type($fp));
-        self::assertInternalType('array', $stream->getMetadata());
+        self::assertIsArray($stream->getMetadata());
         $stream = null;
         self::assertEquals('Unknown', get_resource_type($fp));
 
         $fp = fopen(self::READ_RESOURCE, 'rb');
         $stream = new Stream($fp);
-        self::assertInternalType('resource', $fp);
+        self::assertIsResource($fp);
         self::assertEquals('stream', get_resource_type($fp));
-        self::assertInternalType('array', $stream->getMetadata());
+        self::assertIsArray($stream->getMetadata());
         $stream->close();
         self::assertEquals('Unknown', get_resource_type($fp));
         self::assertNull($stream->getMetadata());
 
         $fp = fopen(self::READ_RESOURCE, 'rb');
         $stream = new Stream($fp);
-        self::assertInternalType('resource', $fp);
+        self::assertIsResource($fp);
         self::assertEquals('stream', get_resource_type($fp));
-        self::assertInternalType('array', $stream->getMetadata());
+        self::assertIsArray($stream->getMetadata());
         $fp = $stream->detach();
-        self::assertInternalType('resource', $fp);
+        self::assertIsResource($fp);
         self::assertEquals('stream', get_resource_type($fp));
         self::assertNull($stream->getMetadata());
         $stream->close();
@@ -484,7 +484,7 @@ class StreamTest extends TestCase
     public function testGetMetadata(): void
     {
         $stream = new Stream(fopen(self::READ_RESOURCE, 'rb'));
-        self::assertInternalType('array', $stream->getMetadata());
+        self::assertIsArray($stream->getMetadata());
         self::assertNull($stream->getMetadata('some thought up key'));
         self::assertEquals('rb', $stream->getMetadata('mode'));
     }

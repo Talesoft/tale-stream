@@ -3,12 +3,12 @@
 namespace Tale\Test\Stream;
 
 use PHPUnit\Framework\TestCase;
-use Tale\Stream\Factory;
+use Tale\StreamFactory;
 
 /**
- * @coversDefaultClass \Tale\Stream\Factory
+ * @coversDefaultClass \Tale\StreamFactory
  */
-class FactoryTest extends TestCase
+class StreamFactoryTest extends TestCase
 {
     /**
      * @covers ::createStream
@@ -17,7 +17,7 @@ class FactoryTest extends TestCase
      */
     public function testConstruct(): void
     {
-        $factory = new Factory();
+        $factory = new StreamFactory();
         $stream = $factory->createStream('test');
         self::assertSame(4, $stream->getSize());
 
