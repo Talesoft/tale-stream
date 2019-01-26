@@ -109,14 +109,6 @@ $stream = stream_temp('Some Content!', 1024);
 //Stream will start swapping after 1024 bytes
 ```
 
-
-```php
-$fs = Stream::createFileStream(__DIR__.'/some-file.txt', 'rb');
-while (!$fs->eof()) {
-    echo $fs->read(32);
-}
-```
-
 #### Input Stream
 
 The input stream is a readable file stream on `php://input`.
