@@ -61,13 +61,13 @@ use Tale\StreamFactory;
 
 $container->add(StreamFactory::class);
 
-//...
+// ...
 
 $streamFactory = $container->get(StreamFactoryInterface::class);
 
 $stream = $streamFactory->createStreamFromFile('./some-file.txt', 'rb');
 
-echo $stream; //"<contents of some-file.txt>"
+echo $stream; // "<contents of some-file.txt>"
 ```
 
 ### File Streams
@@ -80,7 +80,7 @@ use function Tale\stream_file;
 
 $stream = stream_file('./some-file.txt', 'rb');
 
-echo $stream->getContents(); //"<contents of some-file.txt>"
+echo $stream->getContents(); // "<contents of some-file.txt>"
 ```
 
 ### Memory Streams
@@ -94,7 +94,7 @@ use function Tale\stream_memory;
 
 $stream = stream_memory('Some Content!');
 
-echo $stream->getContents(); //"Some Content!"
+echo $stream->getContents(); // "Some Content!"
 ```
 
 ### Temporary Streams
@@ -106,7 +106,7 @@ they will start swapping data into a file to save memory.
 use function Tale\stream_memory;
 
 $stream = stream_temp('Some Content!', 1024);
-//Stream will start swapping after 1024 bytes
+// Stream will start swapping after 1024 bytes
 ```
 
 #### Input Stream
@@ -117,8 +117,6 @@ for APIs that work with structured data formats.
 
 ```php
 use function Tale\stream_input;
-
-//...
 
 $stream = stream_input();
 
@@ -149,7 +147,7 @@ use function Tale\stream_stdin;
 
 $stream = stream_stdin();
 
-echo $stream->getContents(); //"<piped input>"
+echo $stream->getContents(); // "<piped input>"
 ```
 
 #### STDERR Stream
@@ -189,7 +187,7 @@ use function Tale\stream_null;
 
 $stream = stream_null();
 
-echo $stream->read(100); //Will always return an empty string
+echo $stream->read(100); // Will always return an empty string
 ```
 
 ### Read streams with iterators
@@ -200,16 +198,16 @@ here work with any PSR-7 stream, not only `Tale\Stream` instances.
 
 ```php
 use function Tale\stream_memory;
-use function Tale\stream_iterator_read;
+use function Tale\stream_read;
 
 $stream = stream_memory('abcdefg');
 
-$iterator = stream_iterator_read($stream, 2); //Chunk size of 2
+$iterator = stream_read($stream, 2); //Chunk size of 2
 
 $chunks = iterator_to_array($iterator);
-//You could alternatively iterate the iterator with foreach
+// You could alternatively iterate the iterator with foreach
 
-dump($chunks); //['ab', 'cd', 'ef', 'g']
+dump($chunks); // ['ab', 'cd', 'ef', 'g']
 ```
 
 ### Iterate lines of a stream
@@ -227,7 +225,7 @@ $stream = stream_memory("Line 1\nLine 2\nLine 3");
 
 $lines = stream_get_lines($stream);
 
-dump(iterator_to_array($lines)); //["Line 1", "Line 2", "Line 3"]
+dump(iterator_to_array($lines)); // ["Line 1", "Line 2", "Line 3"]
 ```
 
 #### Split streams by delimiters
@@ -244,7 +242,7 @@ $stream = stream_memory('a,b,c,d');
 
 $items = stream_split($stream, ',');
 
-dump(iterator_to_array($items)); //['a', 'b', 'c', 'd']
+dump(iterator_to_array($items)); // ['a', 'b', 'c', 'd']
 ```
 
 #### Write to streams with iterators
@@ -254,23 +252,25 @@ easily.
 
 ```php
 use function Tale\stream_memory;
-use function Tale\stream_iterator_write;
+use function Tale\stream_write;
 
 function generateLines()
 {
     yield "Line 1\n";
     yield "Line 2\n";
-    yield "Line 3
+    yield "Line 3\n";
 }
 
 $stream = stream_memory();
 
-$writer = stream_iterator_write($stream, generateLines());
-
+$writer = stream_write($stream, generateLines());
 $writtenBytes = $writer->writeAll();
 
-//You could also iterate the write to leave place for other actions
-//e.g. in async environments
+// or use stream_write_all()
+$writer = stream_write_all($stream, generateLines());
+
+// You could also iterate the write to leave place for other actions
+// e.g. in async environments
 ```
 
 ### Pipe streams
@@ -287,5 +287,9 @@ $outputStream = stream_memory();
 
 $writer = stream_pipe($inputStream, $outputStream);
 $writer->writeAll();
+
+// or use stream_pipe_all()
+$writer = stream_pipe_all($inputStream, $outputStream);
+
 ```
 

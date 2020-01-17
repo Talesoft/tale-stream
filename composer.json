@@ -5,6 +5,12 @@
     "description": "A basic PSR-7 and PSR-17 compatible stream utility library",
     "license": "MIT",
     "homepage": "http://docs.talesoft.codes/php/tale/stream",
+    "scripts": {
+        "test": "phpunit",
+        "test:coverage-html": "phpunit --coverage-html=coverage",
+        "lint": "phpcs",
+        "lint:fix": "phpcbf"
+    },
     "authors": [
         {
             "name": "Torben Köhn",
@@ -12,9 +18,13 @@
         }
     ],
     "require": {
-        "php": ">=7.1.0",
+        "php": ">=7.4.0",
         "psr/http-message": "^1.0",
         "psr/http-factory": "^1.0"
+    },
+    "require-dev": {
+        "phpunit/phpunit": "^8.4",
+        "squizlabs/php_codesniffer": "^3.5"
     },
     "autoload": {
         "psr-4": {
@@ -23,11 +33,8 @@
         },
         "files": ["src/functions.php"]
     },
-    "provides": {
+    "provide": {
         "psr/http-message-implementation": "~1.0",
         "psr/http-factory-implementation": "~1.0"
-    },
-    "require-dev": {
-        "talesoft/tale-dev-tool": "dev-master"
     }
 }

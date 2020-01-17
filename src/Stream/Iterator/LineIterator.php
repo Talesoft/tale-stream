@@ -2,6 +2,8 @@
 
 namespace Tale\Stream\Iterator;
 
+use Generator;
+
 /**
  * An iterator that reads a stream line by line based on a specified line delimiter.
  *
@@ -28,16 +30,16 @@ final class LineIterator implements \IteratorAggregate
     /**
      * The ReadIterator that we're reading line by line.
      *
-     * @var iterable
+     * @var ReadIterator
      */
-    private $readIterator;
+    private ReadIterator $readIterator;
 
     /**
      * The delimiter of our lines.
      *
      * @var string
      */
-    private $delimiter;
+    private string $delimiter;
 
     /**
      * Creates a new line iterator instance.
@@ -78,9 +80,9 @@ final class LineIterator implements \IteratorAggregate
     }
 
     /**
-     * @return \Generator|string[]
+     * @return Generator<string>
      */
-    public function getIterator(): \Generator
+    public function getIterator(): Generator
     {
         $iterator = new SplitIterator($this->readIterator, $this->delimiter);
         foreach ($iterator as $content) {

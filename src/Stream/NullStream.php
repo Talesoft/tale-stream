@@ -133,7 +133,7 @@ final class NullStream implements StreamInterface
     }
 
     /**
-     * @throws \RuntimeException
+     * @throws RuntimeException
      */
     public function __clone()
     {

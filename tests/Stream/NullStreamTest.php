@@ -3,6 +3,7 @@
 namespace Tale\Test\Stream;
 
 use PHPUnit\Framework\TestCase;
+use RuntimeException;
 use Tale\Stream;
 use Tale\Stream\NullStream;
 
@@ -51,10 +52,10 @@ class NullStreamTest extends TestCase
 
     /**
      * @covers ::__clone
-     * @expectedException \RuntimeException
      */
     public function testCloneThrowsException(): void
     {
+        $this->expectException(RuntimeException::class);
         $stream = new NullStream();
         $clonedStream = clone $stream;
     }

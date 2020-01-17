@@ -10,11 +10,11 @@ use function Tale\stream_factory;
 use function Tale\stream_file;
 use function Tale\stream_get_lines;
 use function Tale\stream_input;
-use function Tale\stream_iterator_line;
-use function Tale\stream_iterator_read;
-use function Tale\stream_iterator_split;
-use function Tale\stream_iterator_write;
-use function Tale\stream_iterator_write_all;
+use function Tale\stream_read_lines;
+use function Tale\stream_read;
+use function Tale\stream_read_split;
+use function Tale\stream_write;
+use function Tale\stream_write_all;
 use function Tale\stream_memory;
 use function Tale\stream_null;
 use function Tale\stream_output;
@@ -25,7 +25,6 @@ use function Tale\stream_stderr;
 use function Tale\stream_stdin;
 use function Tale\stream_stdout;
 use function Tale\stream_temp;
-use function Tale\stream_write_all;
 use Tale\StreamFactory;
 
 class StreamFunctionsTest extends TestCase
@@ -142,12 +141,12 @@ class StreamFunctionsTest extends TestCase
     }
 
     /**
-     * @covers ::\Tale\stream_iterator_line
+     * @covers ::\Tale\stream_read_lines
      */
-    public function testStreamIteratorLine(): void
+    public function testStreamReadLines(): void
     {
-        $reader = stream_iterator_read(stream_memory("Line 1\nLine 2\nLine 3"));
-        $iter = stream_iterator_line($reader);
+        $reader = stream_read(stream_memory("Line 1\nLine 2\nLine 3"));
+        $iter = stream_read_lines($reader);
         self::assertSame(['Line 1', 'Line 2', 'Line 3'], iterator_to_array($iter));
     }
 
@@ -161,21 +160,21 @@ class StreamFunctionsTest extends TestCase
     }
 
     /**
-     * @covers ::\Tale\stream_iterator_read
+     * @covers ::\Tale\stream_read
      */
-    public function testStreamIteratorRead(): void
+    public function testStreamRead(): void
     {
-        $reader = stream_iterator_read(stream_memory("Line 1\nLine 2\nLine 3"), 10);
+        $reader = stream_read(stream_memory("Line 1\nLine 2\nLine 3"), 10);
         self::assertSame(["Line 1\nLin", "e 2\nLine 3"], iterator_to_array($reader));
     }
 
     /**
-     * @covers ::\Tale\stream_iterator_split
+     * @covers ::\Tale\stream_read_split
      */
-    public function testStreamIteratorSplit(): void
+    public function testStreamReadSplit(): void
     {
-        $reader = stream_iterator_read(stream_memory('a,b,c,d'));
-        $iter = stream_iterator_split($reader, ',');
+        $reader = stream_read(stream_memory('a,b,c,d'));
+        $iter = stream_read_split($reader, ',');
         self::assertSame(['a', 'b', 'c', 'd'], iterator_to_array($iter));
     }
 
@@ -189,17 +188,17 @@ class StreamFunctionsTest extends TestCase
     }
 
     /**
-     * @covers ::\Tale\stream_iterator_write
+     * @covers ::\Tale\stream_write
      */
-    public function testStreamIteratorWrite(): void
+    public function testStreamWrite(): void
     {
-        $generateLines = function () {
+        $generateLines = static function () {
             yield "Line 1\n";
             yield "Line 2\n";
             yield "Line 3\n";
         };
         $stream = stream_memory();
-        $writer = stream_iterator_write($stream, $generateLines());
+        $writer = stream_write($stream, $generateLines());
         self::assertSame(21, $writer->writeAll());
         $stream->rewind();
         self::assertSame("Line 1\nLine 2\nLine 3\n", $stream->getContents());
@@ -207,17 +206,17 @@ class StreamFunctionsTest extends TestCase
     }
 
     /**
-     * @covers ::\Tale\stream_iterator_write_all
+     * @covers ::\Tale\stream_write_all
      */
-    public function testStreamIteratorWriteAll(): void
+    public function testStreamWriteAll(): void
     {
-        $generateLines = function () {
+        $generateLines = static function () {
             yield "Line 1\n";
             yield "Line 2\n";
             yield "Line 3\n";
         };
         $stream = stream_memory();
-        self::assertSame(21, stream_iterator_write_all($stream, $generateLines()));
+        self::assertSame(21, stream_write_all($stream, $generateLines()));
         $stream->rewind();
         self::assertSame("Line 1\nLine 2\nLine 3\n", $stream->getContents());
         $stream->close();
@@ -228,13 +227,13 @@ class StreamFunctionsTest extends TestCase
      */
     public function testStreamPipe(): void
     {
-        $generateLines = function () {
+        $generateLines = static function () {
             yield "Line 1\n";
             yield "Line 2\n";
             yield "Line 3\n";
         };
         $stream = stream_memory();
-        self::assertSame(21, stream_iterator_write_all($stream, $generateLines()));
+        self::assertSame(21, stream_write_all($stream, $generateLines()));
         $stream->rewind();
         $targetStream = stream_memory();
         $writer = stream_pipe($stream, $targetStream);
@@ -250,13 +249,13 @@ class StreamFunctionsTest extends TestCase
      */
     public function testStreamPipeAll(): void
     {
-        $generateLines = function () {
+        $generateLines = static function () {
             yield "Line 1\n";
             yield "Line 2\n";
             yield "Line 3\n";
         };
         $stream = stream_memory();
-        self::assertSame(21, stream_iterator_write_all($stream, $generateLines()));
+        self::assertSame(21, stream_write_all($stream, $generateLines()));
         $stream->rewind();
         $targetStream = stream_memory();
         self::assertSame(21, stream_pipe_all($stream, $targetStream));

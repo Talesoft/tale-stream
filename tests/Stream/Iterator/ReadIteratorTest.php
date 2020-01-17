@@ -3,6 +3,7 @@
 namespace Tale\Test\Stream\Iterator;
 
 use Tale\Stream;
+use Tale\Stream\Exception\NotReadableException;
 use Tale\Stream\Iterator\ReadIterator;
 
 /**
@@ -30,10 +31,10 @@ class ReadIteratorTest extends AbstractIteratorTest
 
     /**
      * @covers ::__construct
-     * @expectedException \RuntimeException
      */
     public function testIfConstructorThrowsExceptionOnNonReadableStream(): void
     {
+        $this->expectException(NotReadableException::class);
         $iterator = new ReadIterator(Stream::createOutputStream(), 8);
     }
 }

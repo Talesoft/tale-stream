@@ -2,7 +2,10 @@
 
 namespace Tale\Stream\Iterator;
 
+use Generator;
+use InvalidArgumentException;
 use Psr\Http\Message\StreamInterface;
+use RuntimeException;
 use Tale\Stream\Exception\NotWritableException;
 
 /**
@@ -17,20 +20,20 @@ final class WriteIterator implements \IteratorAggregate
      *
      * @var StreamInterface
      */
-    private $stream;
+    private StreamInterface $stream;
 
     /**
      * The iterable to read from.
      *
-     * @var iterable
+     * @var iterable<string>
      */
-    private $sourceIterable;
+    private iterable $sourceIterable;
 
     /**
      * Creates a new write iterator instance.
      *
      * @param StreamInterface $stream A writable stream instance to write to.
-     * @param iterable $sourceIterable An iterable to read from.
+     * @param iterable<string> $sourceIterable An iterable to read from.
      */
     public function __construct(StreamInterface $stream, iterable $sourceIterable)
     {
@@ -54,7 +57,7 @@ final class WriteIterator implements \IteratorAggregate
     /**
      * Returns to iterable that is read from.
      *
-     * @return iterable
+     * @return iterable<string>
      */
     public function getSourceIterable(): iterable
     {
@@ -64,15 +67,16 @@ final class WriteIterator implements \IteratorAggregate
     /**
      * Generates integer values for the amount of written bytes in each iteration.
      *
-     * @return \Generator
+     * @return Generator<int>
+     * @throws RuntimeException When the iterable generates values that are not writable.
      */
-    public function getIterator(): \Generator
+    public function getIterator(): Generator
     {
         foreach ($this->sourceIterable as $content) {
             try {
                 yield $this->stream->write($content);
-            } catch (\InvalidArgumentException $ex) {
-                throw new \RuntimeException('The iterable generated values that are not writable', 0, $ex);
+            } catch (InvalidArgumentException $ex) {
+                throw new RuntimeException('The iterable generated values that are not writable', 0, $ex);
             }
         }
     }

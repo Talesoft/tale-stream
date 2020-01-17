@@ -15,16 +15,25 @@ use Psr\Http\Message\StreamInterface;
  */
 final class StreamFactory implements StreamFactoryInterface
 {
+    /**
+     * {@inheritdoc}
+     */
     public function createStream(string $content = ''): StreamInterface
     {
         return Stream::createMemoryStream($content);
     }
 
+    /**
+     * {@inheritdoc}
+     */
     public function createStreamFromFile(string $filename, string $mode = 'rb'): StreamInterface
     {
         return Stream::createFileStream($filename, $mode);
     }
 
+    /**
+     * {@inheritdoc}
+     */
     public function createStreamFromResource($resource): StreamInterface
     {
         return new Stream($resource);

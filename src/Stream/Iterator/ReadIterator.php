@@ -12,19 +12,21 @@ use Tale\Stream\Exception\NotReadableException;
  */
 final class ReadIterator implements \IteratorAggregate
 {
+    public const DEFAULT_CHUNK_SIZE = 1024;
+
     /**
      * The stream that is read from.
      *
      * @var StreamInterface
      */
-    private $stream;
+    private StreamInterface $stream;
 
     /**
      * The chunk size to read for every iteration.
      *
      * @var int
      */
-    private $chunkSize;
+    private int $chunkSize;
 
     /**
      * Creates a new read iterator.
@@ -32,7 +34,7 @@ final class ReadIterator implements \IteratorAggregate
      * @param StreamInterface $stream The stream instance to read from.
      * @param int $chunkSize The chunk size to use for each iteration (Default: 1024)
      */
-    public function __construct(StreamInterface $stream, int $chunkSize = 1024)
+    public function __construct(StreamInterface $stream, int $chunkSize = self::DEFAULT_CHUNK_SIZE)
     {
         if (!$stream->isReadable()) {
             throw new NotReadableException('Stream is not readable');
@@ -81,7 +83,7 @@ final class ReadIterator implements \IteratorAggregate
         while (!$this->stream->eof()) {
             $item = $this->stream->read($this->chunkSize);
             // @codeCoverageIgnoreStart
-            //I don't know how to fabricate this manually, so I can't test it.
+            // I don't know how to fabricate this manually, so I can't test it.
             if ($item === '') {
                 continue;
             }

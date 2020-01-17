@@ -2,6 +2,8 @@
 
 namespace Tale\Stream\Iterator;
 
+use Generator;
+
 /**
  * An iterator that takes any iterable and splits its full content by a delimiter.
  *
@@ -22,14 +24,14 @@ final class SplitIterator implements \IteratorAggregate
      *
      * @var ReadIterator
      */
-    private $readIterator;
+    private ReadIterator $readIterator;
 
     /**
      * The delimiter we split up by.
      *
      * @var string
      */
-    private $delimiter;
+    private string $delimiter;
 
     /**
      * Creates a new split iterator instance.
@@ -66,9 +68,9 @@ final class SplitIterator implements \IteratorAggregate
     /**
      * Generates parts of an iterator split by the specified delimiter.
      *
-     * @return \Generator|string[]
+     * @return Generator<string>
      */
-    public function getIterator(): \Generator
+    public function getIterator(): Generator
     {
         $line = '';
         foreach ($this->readIterator as $content) {

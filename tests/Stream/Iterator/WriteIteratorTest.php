@@ -2,12 +2,16 @@
 
 namespace Tale\Test\Stream\Iterator;
 
+use ArrayIterator;
 use CallbackFilterIterator;
+use InvalidArgumentException;
 use IteratorIterator;
+use RuntimeException;
 use Tale\Stream;
 use Tale\Stream\Iterator\LineIterator;
 use Tale\Stream\Iterator\ReadIterator;
 use Tale\Stream\Iterator\WriteIterator;
+use Tale\Stream\Exception\NotWritableException;
 
 /**
  * @coversDefaultClass \Tale\Stream\Iterator\WriteIterator
@@ -40,32 +44,29 @@ class WriteIteratorTest extends AbstractIteratorTest
     {
         $inputStream = Stream::createMemoryStream("ab\ncd\nde\ng");
 
-        //Use a LineIterator to cleanly read lines
+        // Use a LineIterator to cleanly read lines
         $reader = new LineIterator(new ReadIterator($inputStream));
 
-        //Will filter all lines that match "de"
-        $filteredReader = new CallbackFilterIterator($reader->getIterator(), function (string $line) {
-            return $line !== 'de';
-        });
+        // Will filter all lines that match "de"
+        $filteredReader = new CallbackFilterIterator($reader->getIterator(), fn (string $line) => $line !== 'de');
 
-        //Will add "\n" to all lines
-        $addLfModifier = new class($filteredReader) extends IteratorIterator
+        // Will add "\n" to all lines
+        return new class($filteredReader) extends IteratorIterator
         {
             public function current(): string
             {
                 return parent::current()."\n";
             }
         };
-        return $addLfModifier;
     }
 
     /**
      * @covers ::__construct
-     * @expectedException \RuntimeException
      */
     public function testIfConstructThrowsExceptionWhenStreamIsNotWritable(): void
     {
-        $writeIterator = new WriteIterator(Stream::createInputStream(), new \ArrayIterator());
+        $this->expectException(NotWritableException::class);
+        $writeIterator = new WriteIterator(Stream::createInputStream(), new ArrayIterator());
     }
 
     /**
@@ -73,11 +74,11 @@ class WriteIteratorTest extends AbstractIteratorTest
      * @covers ::getIterator
      * @covers ::writeAll
      * @dataProvider provideNonWritableValues
-     * @expectedException \RuntimeException
      * @param $arg
      */
     public function testIfGetIteratorThrowsExceptionOnNonWritableValue($arg): void
     {
+        $this->expectException(RuntimeException::class);
         $writeIterator = new WriteIterator(Stream::createMemoryStream(), [$arg]);
         $writeIterator->writeAll();
     }

@@ -4,8 +4,16 @@ namespace Tale\Test\Stream;
 
 use InvalidArgumentException;
 use PHPUnit\Framework\TestCase;
+use ReflectionException;
+use ReflectionProperty;
 use RuntimeException;
 use Tale\Stream;
+use Tale\Stream\Exception\NotReadableException;
+use Tale\Stream\Exception\NotSeekableException;
+use Tale\Stream\Exception\NotWritableException;
+use Tale\Stream\Exception\ResourceClosedException;
+use Tale\Stream\Exception\ResourceInvalidException;
+use function strlen;
 
 /**
  * @coversDefaultClass \Tale\Stream
@@ -40,7 +48,8 @@ class StreamTest extends TestCase
         self::assertIsArray($stream->getMetadata());
         $stream->close();
         self::assertEquals('Unknown', get_resource_type($fp));
-        self::assertNull($stream->getMetadata());
+        self::assertIsArray($stream->getMetadata());
+        self::assertCount(0, $stream->getMetadata());
 
         $fp = fopen(self::READ_RESOURCE, 'rb');
         $stream = new Stream($fp);
@@ -50,7 +59,8 @@ class StreamTest extends TestCase
         $fp = $stream->detach();
         self::assertIsResource($fp);
         self::assertEquals('stream', get_resource_type($fp));
-        self::assertNull($stream->getMetadata());
+        self::assertIsArray($stream->getMetadata());
+        self::assertCount(0, $stream->getMetadata());
         $stream->close();
         self::assertEquals('stream', get_resource_type($fp));
         fclose($fp);
@@ -98,8 +108,8 @@ class StreamTest extends TestCase
         self::assertNull($stream->getSize());
 
         $stream = new Stream(fopen(self::HTTP_RESOURCE, 'rb'));
-        self::assertEquals(0, $stream->getSize()); //Can't get a size from HTTP Streams (the content is 30 chars long)
-        self::assertEquals(30, \strlen($stream->getContents())); //But we can read it!
+        self::assertEquals(0, $stream->getSize()); // Can't get a size from HTTP Streams (the content is 30 chars long)
+        self::assertEquals(30, strlen($stream->getContents())); // But we can read it!
     }
 
     /**
@@ -117,10 +127,10 @@ class StreamTest extends TestCase
     /**
      * @covers ::__construct
      * @covers ::tell
-     * @expectedException \Tale\Stream\Exception\ResourceClosedException
      */
     public function testTellThrowsExceptionOnClosedResource(): void
     {
+        $this->expectException(ResourceClosedException::class);
         $resource = fopen(self::READ_RESOURCE, 'rb');
         $stream = new Stream($resource);
         fclose($resource);
@@ -130,14 +140,14 @@ class StreamTest extends TestCase
     /**
      * @covers ::__construct
      * @covers ::tell
-     * @expectedException \Tale\Stream\Exception\ResourceInvalidException
-     * @throws \ReflectionException
+     * @throws ReflectionException
      */
     public function testTellThrowsExceptionOnInvalidResource(): void
     {
+        $this->expectException(ResourceInvalidException::class);
         $resource = fopen(self::READ_RESOURCE, 'rb');
         $stream = new Stream($resource);
-        $prop = new \ReflectionProperty(Stream::class, 'resource');
+        $prop = new ReflectionProperty(Stream::class, 'resource');
         $prop->setAccessible(true);
         $prop->setValue($stream, stream_context_create());
         $prop->setAccessible(false);
@@ -220,11 +230,11 @@ class StreamTest extends TestCase
      * @covers ::__construct
      * @covers ::seek
      * @dataProvider provideNonIntArguments
-     * @expectedException InvalidArgumentException
      * @param $arg
      */
     public function testSeekThrowsExceptionOnInvalidOffset($arg): void
     {
+        $this->expectException(InvalidArgumentException::class);
         $stream = new Stream(fopen(self::READ_RESOURCE, 'rb'));
         $stream->seek($arg);
     }
@@ -233,11 +243,11 @@ class StreamTest extends TestCase
      * @covers ::__construct
      * @covers ::seek
      * @dataProvider provideNonIntArguments
-     * @expectedException InvalidArgumentException
      * @param $arg
      */
     public function testSeekThrowsExceptionOnInvalidWhence($arg): void
     {
+        $this->expectException(InvalidArgumentException::class);
         $stream = new Stream(fopen(self::READ_RESOURCE, 'rb'));
         $stream->seek(0, $arg);
     }
@@ -245,10 +255,10 @@ class StreamTest extends TestCase
     /**
      * @covers ::__construct
      * @covers ::seek
-     * @expectedException \Tale\Stream\Exception\ResourceClosedException
      */
     public function testSeekThrowsExceptionOnClosedResource(): void
     {
+        $this->expectException(ResourceClosedException::class);
         $resource = fopen(self::READ_RESOURCE, 'rb');
         $stream = new Stream($resource);
         fclose($resource);
@@ -258,10 +268,10 @@ class StreamTest extends TestCase
     /**
      * @covers ::__construct
      * @covers ::seek
-     * @expectedException \Tale\Stream\Exception\NotSeekableException
      */
     public function testSeekThrowsExceptionWhenNotSeekable(): void
     {
+        $this->expectException(NotSeekableException::class);
         $stream = new Stream(fopen(self::HTTP_RESOURCE, 'rb'));
         $stream->seek(5);
     }
@@ -282,10 +292,10 @@ class StreamTest extends TestCase
     /**
      * @covers ::__construct
      * @covers ::rewind
-     * @expectedException \Tale\Stream\Exception\NotSeekableException
      */
     public function testRewindThrowsExceptionWhenNotSeekable(): void
     {
+        $this->expectException(NotSeekableException::class);
         $stream = new Stream(fopen(self::HTTP_RESOURCE, 'rb'));
         $stream->rewind();
     }
@@ -330,10 +340,10 @@ class StreamTest extends TestCase
      * @covers ::__construct
      * @covers ::write
      * @dataProvider provideNonStringArguments
-     * @expectedException InvalidArgumentException
      */
     public function testWriteThrowsExceptionOnInvalidContent($arg): void
     {
+        $this->expectException(InvalidArgumentException::class);
         $stream = new Stream(fopen(self::READ_RESOURCE, 'rb'));
         $stream->write($arg);
     }
@@ -341,10 +351,10 @@ class StreamTest extends TestCase
     /**
      * @covers ::__construct
      * @covers ::write
-     * @expectedException \Tale\Stream\Exception\NotWritableException
      */
     public function testWriteThrowsExceptionWhenNotWritable(): void
     {
+        $this->expectException(NotWritableException::class);
         $stream = new Stream(fopen(self::READ_RESOURCE, 'rb'));
         $stream->write('Test String');
     }
@@ -352,10 +362,10 @@ class StreamTest extends TestCase
     /**
      * @covers ::__construct
      * @covers ::write
-     * @expectedException \Tale\Stream\Exception\ResourceClosedException
      */
     public function testWriteThrowsExceptionOnClosedResource(): void
     {
+        $this->expectException(ResourceClosedException::class);
         $resource = fopen(self::READ_RESOURCE, 'rb');
         $stream = new Stream($resource);
         fclose($resource);
@@ -404,11 +414,11 @@ class StreamTest extends TestCase
      * @covers ::__construct
      * @covers ::read
      * @dataProvider provideNonIntArguments
-     * @expectedException InvalidArgumentException
      * @param $arg
      */
     public function testReadThrowsExceptionOnInvalidLength($arg): void
     {
+        $this->expectException(InvalidArgumentException::class);
         $stream = new Stream(fopen(self::READ_RESOURCE, 'rb'));
         $stream->read($arg);
     }
@@ -416,10 +426,10 @@ class StreamTest extends TestCase
     /**
      * @covers ::__construct
      * @covers ::read
-     * @expectedException \Tale\Stream\Exception\ResourceClosedException
      */
     public function testReadThrowsExceptionOnClosedResource(): void
     {
+        $this->expectException(ResourceClosedException::class);
         $resource = fopen(self::READ_RESOURCE, 'rb');
         $stream = new Stream($resource);
         fclose($resource);
@@ -429,10 +439,10 @@ class StreamTest extends TestCase
     /**
      * @covers ::__construct
      * @covers ::read
-     * @expectedException \Tale\Stream\Exception\NotReadableException
      */
     public function testReadThrowsExceptionWhenNotReadable(): void
     {
+        $this->expectException(NotReadableException::class);
         $stream = new Stream(fopen(self::READ_RESOURCE, 'ab'));
         $stream->read(4);
     }
@@ -456,10 +466,10 @@ class StreamTest extends TestCase
     /**
      * @covers ::__construct
      * @covers ::getContents
-     * @expectedException RuntimeException
      */
     public function testGetContentsThrowsExceptionWhenNotReadable(): void
     {
+        $this->expectException(RuntimeException::class);
         $stream = new Stream(fopen(self::READ_RESOURCE, 'ab'));
         $stream->getContents();
     }
@@ -467,10 +477,10 @@ class StreamTest extends TestCase
     /**
      * @covers ::__construct
      * @covers ::getContents
-     * @expectedException \Tale\Stream\Exception\ResourceClosedException
      */
     public function testGetContentsThrowsExceptionOnClosedResource(): void
     {
+        $this->expectException(ResourceClosedException::class);
         $resource = fopen(self::READ_RESOURCE, 'rb');
         $stream = new Stream($resource);
         fclose($resource);
@@ -493,10 +503,10 @@ class StreamTest extends TestCase
      * @covers ::__construct
      * @covers ::getMetadata
      * @dataProvider provideInvalidMetadataKeys
-     * @expectedException \InvalidArgumentException
      */
-    public function testGetMetadatThrowsExceptionOnInvalidKey($arg): void
+    public function testGetMetadataThrowsExceptionOnInvalidKey($arg): void
     {
+        $this->expectException(InvalidArgumentException::class);
         $stream = new Stream(fopen(self::READ_RESOURCE, 'rb'));
         self::assertEquals('rb', $stream->getMetadata($arg));
     }
@@ -524,10 +534,10 @@ class StreamTest extends TestCase
     /**
      * @covers ::__construct
      * @covers ::__clone
-     * @expectedException RuntimeException
      */
     public function testCloneThrowsException(): void
     {
+        $this->expectException(RuntimeException::class);
         $stream = new Stream(fopen(self::READ_RESOURCE, 'rb'));
         $clone = clone $stream;
     }

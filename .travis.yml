@@ -1,22 +1,12 @@
-
 language: php
-
 git:
     depth: 5
-
 php:
-    - 7.1
-    - 7.2
-    - 7.3
-
+    - 7.4
 install:
     - travis_retry composer clear-cache
     - travis_retry composer self-update
     - travis_retry composer install
-
 script:
-    - vendor/bin/tale-dev check --report --coverage-php-version=7.1
-
-addons:
-    code_climate:
-        repo_token: 24a65b8c54d4a62ca7c338189236543788d7d56f61bacaf53023e025ca31b5fd
+    - composer lint
+    - composer test
