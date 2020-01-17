@@ -267,7 +267,7 @@ $writer = stream_write($stream, generateLines());
 $writtenBytes = $writer->writeAll();
 
 // or use stream_write_all()
-$writer = stream_write_all($stream, generateLines());
+$writtenBytes = stream_write_all($stream, generateLines());
 
 // You could also iterate the write to leave place for other actions
 // e.g. in async environments
@@ -289,7 +289,6 @@ $writer = stream_pipe($inputStream, $outputStream);
 $writer->writeAll();
 
 // or use stream_pipe_all()
-$writer = stream_pipe_all($inputStream, $outputStream);
-
+$writtenBytes = stream_pipe_all($inputStream, $outputStream);
 ```
 
